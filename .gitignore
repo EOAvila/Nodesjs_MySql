@@ -1,0 +1,23 @@
+////////////////////////////////////
+node_modules
+.env
+dist
+coverage
+*.log
+
+////////////////////////////////////
+# Extensiones de editores
+.vscode/
+.idea/
+
+////////////////////////////////////
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+///////////////////////////////////
+# Otros de Node
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
