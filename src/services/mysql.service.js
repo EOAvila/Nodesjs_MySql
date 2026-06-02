@@ -162,16 +162,49 @@ export const insertarCliente = async ({
 
 export const buscarClientePorId = async (id) => {
 
+    ///////////////////////////////////////////////////
+
+    if (!id) {
+        throw new Error(
+            "El ID es requerido"
+        );
+    }
+
+    ///////////////////////////////////////////////////
+
+    if (isNaN(Number(id))) {
+        throw new Error(
+            "El ID debe ser numérico"
+        );
+    }
+
+    ///////////////////////////////////////////////////
+
     const sql = `
-        SELECT *
+        SELECT
+            id,
+            bitrix_id,
+            pri_nombre,
+            pri_apellido,
+            correo,
+            telefono,
+            created_at,
+            updated_at
         FROM pro_clientes
         WHERE id = ?
         LIMIT 1
     `;
 
-    const [rows] = await pool.query(sql, [id]);
+    ///////////////////////////////////////////////////
 
-    return rows[0];
+    const [rows] = await pool.query(
+        sql,
+        [Number(id)]
+    );
+
+    ///////////////////////////////////////////////////
+
+    return rows[0] || null;
 };
 
 ///////////////////////////////////////////////////////////
@@ -179,6 +212,36 @@ export const buscarClientePorId = async (id) => {
 ///////////////////////////////////////////////////////////
 
 export const actualizarCliente = async (id, cliente) => {
+
+    ///////////////////////////////////////////////////
+    // VALIDAR ID
+    ///////////////////////////////////////////////////
+
+    if (!id) {
+        throw new Error(
+            "El ID es requerido"
+        );
+    }
+
+    ///////////////////////////////////////////////////
+
+    if (isNaN(Number(id))) {
+        throw new Error(
+            "El ID debe ser numérico"
+        );
+    }
+
+    ///////////////////////////////////////////////////
+    // VALIDAR OBJETO
+    ///////////////////////////////////////////////////
+
+    if (!cliente) {
+        throw new Error(
+            "Los datos del cliente son requeridos"
+        );
+    }
+
+    ///////////////////////////////////////////////////
 
     const sql = `
         UPDATE pro_clientes
@@ -191,15 +254,41 @@ export const actualizarCliente = async (id, cliente) => {
         WHERE id = ?
     `;
 
+    ///////////////////////////////////////////////////
+
     const values = [
-        cliente.nombre,
-        cliente.apellido,
-        cliente.correo,
-        cliente.telefono,
-        id
+        cliente.nombre || "",
+        cliente.apellido || "",
+        cliente.correo || "",
+        cliente.telefono || "",
+        Number(id)
     ];
 
-    await pool.query(sql, values);
+    ///////////////////////////////////////////////////
+
+    const [result] =
+        await pool.query(sql, values);
+
+    ///////////////////////////////////////////////////
+    // VALIDAR UPDATE
+    ///////////////////////////////////////////////////
+
+    if (result.affectedRows === 0) {
+
+        throw new Error(
+            "Cliente no encontrado"
+        );
+    }
+
+    ///////////////////////////////////////////////////
+
+    return {
+        success: true,
+        affectedRows:
+            result.affectedRows,
+        changedRows:
+            result.changedRows
+    };
 };
 
 ///////////////////////////////////////////////////////////
@@ -208,10 +297,78 @@ export const actualizarCliente = async (id, cliente) => {
 
 export const eliminarCliente = async (id) => {
 
-    const sql = `
-        DELETE FROM pro_clientes
-        WHERE id = ?
-    `;
+    try {
 
-    await pool.query(sql, [id]);
+        ///////////////////////////////////////////////////
+        // VALIDAR ID
+        ///////////////////////////////////////////////////
+
+        if (!id) {
+
+            throw new Error(
+                "El ID es requerido"
+            );
+        }
+
+        ///////////////////////////////////////////////////
+
+        if (isNaN(Number(id))) {
+
+            throw new Error(
+                "El ID debe ser numérico"
+            );
+        }
+
+        ///////////////////////////////////////////////////
+
+        const sql = `
+            DELETE FROM pro_clientes
+            WHERE id = ?
+        `;
+
+        ///////////////////////////////////////////////////
+
+        const [result] =
+            await pool.query(
+                sql,
+                [Number(id)]
+            );
+
+        ///////////////////////////////////////////////////
+        // VALIDAR ELIMINACIÓN
+        ///////////////////////////////////////////////////
+
+        if (result.affectedRows === 0) {
+
+            throw new Error(
+                "Cliente no encontrado"
+            );
+        }
+
+        ///////////////////////////////////////////////////
+
+        return {
+            success: true,
+            message:
+                "Cliente eliminado correctamente",
+            affectedRows:
+                result.affectedRows
+        };
+
+    } catch (error) {
+
+        ///////////////////////////////////////////////////
+
+        console.error(
+            "ERROR ELIMINAR CLIENTE:",
+            error
+        );
+
+        ///////////////////////////////////////////////////
+
+        throw new Error(
+            error.message ||
+            "Error al eliminar cliente"
+        );
+    }
 };
