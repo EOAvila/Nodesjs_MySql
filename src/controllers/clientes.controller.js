@@ -21,7 +21,6 @@ import {
 ///////////////////////////////////////////////////////////
 // INSERTAR CLIENTE
 ///////////////////////////////////////////////////////////
-
 export const insertarClienteController = async (req, res) => {
 
     try {
@@ -33,16 +32,10 @@ export const insertarClienteController = async (req, res) => {
             telefono
         } = req.body;
 
-        console.log(nombre);
-        console.log(apellido);
-        console.log(correo);
-        console.log(telefono);
-
-        res.send('Cliente recibido');
-
         ///////////////////////////////////////////////////
 
         if (!nombre || !apellido || !correo) {
+
             return res.status(400).json({
                 success: false,
                 message: "Datos incompletos"
@@ -52,6 +45,7 @@ export const insertarClienteController = async (req, res) => {
         ///////////////////////////////////////////////////
 
         if (!validator.isEmail(correo)) {
+
             return res.status(400).json({
                 success: false,
                 message: "Correo inválido"
@@ -59,59 +53,60 @@ export const insertarClienteController = async (req, res) => {
         }
 
         ///////////////////////////////////////////////////
-        // CREAR EN BITRIX
+        // TEMPORAL
         ///////////////////////////////////////////////////
-
-//        const bitrix = await crearContactoBitrix({
-//            nombre,
-//            apellido,
-//            correo,
-//            telefono
-//        });
-
-        ///////////////////////////////////////////////////
-
-//      const clienteData = {
-//            bitrix_id: bitrix,
-//            nombre,
-//            apellido,
-//            correo,
-//            telefono
-//        };
 
         const clienteData = {
-            bitrix_id: id,
-            nombre,
-            apellido,
-            correo,
-            telefono
+            bitrix_id:
+                Number(contacto.ID),
+            pri_nombre:
+                contacto.NAME?.trim() || "",
+            pri_apellido:
+                contacto.LAST_NAME?.trim() || "",
+            correo:
+                contacto.EMAIL?.[0]?.VALUE?.trim() || "",
+            telefono:
+                contacto.PHONE?.[0]?.VALUE?.trim() || ""
         };
 
         ///////////////////////////////////////////////////
         // INSERTAR MYSQL
         ///////////////////////////////////////////////////
 
-        const clienteId = await insertarCliente(clienteData);
+        const cliente = await insertarCliente(
+            clienteData
+        );
 
         ///////////////////////////////////////////////////
 
         return res.status(201).json({
+
             success: true,
-            message: "Cliente creado correctamente",
-            data: {
-                id: clienteId,
-                ...clienteData
-            }
+
+            message:
+                "Cliente creado correctamente",
+
+            data: cliente
         });
 
     } catch (error) {
 
-        console.error("ERROR INSERTAR CLIENTE:", error);
+        ///////////////////////////////////////////////////
+
+        console.error(
+            "ERROR INSERTAR CLIENTE:",
+            error
+        );
+
+        ///////////////////////////////////////////////////
 
         return res.status(500).json({
+
             success: false,
-            message: "Error interno del servidor",
-            error: error.message
+
+            message:
+                error.message ||
+                "Error interno del servidor"
         });
     }
 };

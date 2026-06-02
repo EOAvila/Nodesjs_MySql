@@ -1,4 +1,4 @@
-import { createPool } from 'mysql2/promise'
+/*import { createPool } from 'mysql2/promise'
 import dotenv from 'dotenv';
 import chalk from 'chalk';
 
@@ -50,4 +50,4 @@ pool.getConnection()
         console.error(error)
     })
 
-export default pool;
+export default pool;*/
