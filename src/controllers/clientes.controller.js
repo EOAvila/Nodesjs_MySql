@@ -80,7 +80,7 @@ export const insertarClienteController = async (req, res) => {
 //        };
 
         const clienteData = {
-            bitrix_id: bitrix,
+            bitrix_id: id,
             nombre,
             apellido,
             correo,
