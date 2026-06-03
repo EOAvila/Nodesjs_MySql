@@ -40,11 +40,11 @@ app.use(express.urlencoded({
 // RUTAS
 ///////////////////////////////////////////////////////////
 
-app.use("/api", indexRoutes);
+app.use("/api/bitrix", indexRoutes);
 
 app.use("/api/bitrix", bitrixRoutes);
 
-app.use("/api/clientes", clientesRoutes);
+app.use("/api/bitrix", clientesRoutes);
 
 ///////////////////////////////////////////////////////////
 // HEALTH CHECK
@@ -87,6 +87,24 @@ app.use((error, req, res, next) => {
             "Error interno del servidor"
     });
 });
+
+///////////////////////////////////////////////////////////
+app.get(
+    "/health",
+    (req,res)=>{
+
+        res.status(200)
+        .json({
+
+            success:true,
+
+            server:"online",
+
+            timestamp:
+                new Date()
+        });
+    }
+);
 
 ///////////////////////////////////////////////////////////
 

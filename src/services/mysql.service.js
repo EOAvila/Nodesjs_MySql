@@ -1,103 +1,62 @@
+import validator from "validator";
 import { pool } from "../config/db.js";
 
 ///////////////////////////////////////////////////////////
-// BUSCAR CLIENTE POR BITRIX ID
+// BUSCAR POR BITRIX ID
 ///////////////////////////////////////////////////////////
 
-export const buscarClientePorBitrixId = async (bitrixId) => {
+export const buscarClientePorBitrixId =
+async (bitrixId) => {
 
-    try {
+    const sql = `
+        SELECT *
+        FROM pro_clientes
+        WHERE bitrix_id = ?
+        LIMIT 1
+    `;
 
-        ///////////////////////////////////////////////////
-        // VALIDAR EXISTENCIA
-        ///////////////////////////////////////////////////
-
-        if (
-            bitrixId === undefined ||
-            bitrixId === null
-        ) {
-            throw new Error(
-                "El bitrixId es requerido"
-            );
-        }
-
-        ///////////////////////////////////////////////////
-        // VALIDAR NUMÉRICO
-        ///////////////////////////////////////////////////
-
-        if (
-            isNaN(Number(bitrixId))
-        ) {
-            throw new Error(
-                "El bitrixId debe ser numérico"
-            );
-        }
-
-        ///////////////////////////////////////////////////
-        // NORMALIZAR
-        ///////////////////////////////////////////////////
-
-        const bitrixIdNumber =
-            Number(bitrixId);
-
-        ///////////////////////////////////////////////////
-        // QUERY MYSQL
-        ///////////////////////////////////////////////////
-
-        const sql = `
-            SELECT
-                id,
-                bitrix_id,
-                pri_nombre,
-                pri_apellido,
-                correo,
-                telefono,
-                created_at,
-                updated_at
-            FROM pro_clientes
-            WHERE bitrix_id = ?
-            LIMIT 1
-        `;
-
-        ///////////////////////////////////////////////////
-
-        const [rows] = await pool.query(
+    const [rows] =
+        await pool.query(
             sql,
-            [bitrixIdNumber]
+            [Number(bitrixId)]
         );
 
-        ///////////////////////////////////////////////////
-
-        if (!rows || rows.length === 0) {
-            return null;
-        }
-
-        ///////////////////////////////////////////////////
-
-        return rows[0];
-
-    } catch (error) {
-
-        ///////////////////////////////////////////////////
-
-        console.error(
-            "ERROR BUSCAR CLIENTE POR BITRIX ID:",
-            error
-        );
-
-        ///////////////////////////////////////////////////
-
-        throw new Error(
-            error.message ||
-            "Error al buscar cliente"
-        );
-    }
+    return rows.length
+        ? rows[0]
+        : null;
 };
 
 ///////////////////////////////////////////////////////////
-// INSERTAR CLIENTE EN MYSQL
+// BUSCAR POR ID
 ///////////////////////////////////////////////////////////
-export const insertarCliente = async ({
+
+export const buscarClientePorId =
+async (id) => {
+
+    const sql = `
+        SELECT *
+        FROM pro_clientes
+        WHERE id_pro_clientes = ?
+        LIMIT 1
+    `;
+
+    const [rows] =
+        await pool.query(
+            sql,
+            [Number(id)]
+        );
+
+    return rows.length
+        ? rows[0]
+        : null;
+};
+
+///////////////////////////////////////////////////////////
+// UPSERT CLIENTE
+///////////////////////////////////////////////////////////
+
+export const upsertCliente =
+async ({
     bitrix_id,
     nombre,
     apellido,
@@ -105,390 +64,97 @@ export const insertarCliente = async ({
     telefono
 }) => {
 
-    try {
-
-        if (!bitrix_id) {
-            throw new Error("bitrix_id requerido");
-        }
-
-        const [rows] = await pool.query(
-            "SELECT id FROM pro_clientes WHERE correo = ?",
-            [correo]
+    if (!bitrix_id) {
+        throw new Error(
+            "bitrix_id requerido"
         );
+    }
 
-        if (rows.length > 0) {
-            throw new Error("Cliente ya existe");
-        }
+    if (
+        correo &&
+        !validator.isEmail(correo)
+    ) {
+        throw new Error(
+            "Correo inválido"
+        );
+    }
 
-        const sql = `
-            INSERT INTO pro_clientes (
-                bitrix_id,
-                pri_nombre,
-                pri_apellido,
-                correo,
-                telefono
-            )
-            VALUES (?, ?, ?, ?, ?)
-        `;
-
-        const values = [
+    const sql = `
+        INSERT INTO pro_clientes
+        (
             bitrix_id,
-            nombre,
-            apellido,
+            pri_nombre,
+            pri_apellido,
             correo,
             telefono
-        ];
+        )
+        VALUES
+        (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )
 
-        const [result] = await pool.query(sql, values);
+        ON DUPLICATE KEY UPDATE
 
-        return {
-            ok: true,
-            insertId: result.insertId
-        };
+        pri_nombre =
+            VALUES(pri_nombre),
 
-    } catch (error) {
+        pri_apellido =
+            VALUES(pri_apellido),
 
-        console.error("ERROR MYSQL:", error);
+        correo =
+            VALUES(correo),
 
-        throw error;
-    }
-};
+        telefono =
+            VALUES(telefono),
 
+        updated_at =
+            NOW()
+    `;
 
-///////////////////////////////////////////////////////////
-// BUSCAR POR ID
-///////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////
+    const values = [
 
-export const buscarClientePorId = async (
-    id
-) => {
+        Number(bitrix_id),
 
-    try {
+        nombre || "",
 
-        ////////////////////////////////////////////////////
+        apellido || "",
 
-        if (
-            id === undefined ||
-            id === null
-        ) {
-            throw new Error(
-                "El ID es obligatorio"
-            );
-        }
+        correo || "",
 
-        ////////////////////////////////////////////////////
+        telefono || ""
+    ];
 
-        const numericId = Number(id);
-
-        ////////////////////////////////////////////////////
-
-        if (
-            !Number.isInteger(numericId) ||
-            numericId <= 0
-        ) {
-            throw new Error(
-                "El ID debe ser un número entero positivo"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        const sql = `
-            SELECT *
-            FROM pro_clientes
-            WHERE id = ?
-            LIMIT 1
-        `;
-
-        ////////////////////////////////////////////////////
-
-        const [rows] = await pool.query(
-            sql,
-            [numericId]
-        );
-
-        ////////////////////////////////////////////////////
-
-        if (!Array.isArray(rows)) {
-            throw new Error(
-                "Respuesta inválida de MySQL"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        return rows.length > 0
-            ? rows[0]
-            : null;
-
-    } catch (error) {
-
-        ////////////////////////////////////////////////////
-
-        console.error(
-            "ERROR BUSCAR CLIENTE POR ID:",
-            {
-                id,
-                message: error.message
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        throw new Error(
-            error.message ||
-            "Error al buscar cliente"
-        );
-    }
-};
-
-
-///////////////////////////////////////////////////////////
-// ACTUALIZAR CLIENTE EN MYSQL
-///////////////////////////////////////////////////////////
-
-export const actualizarCliente = async (
-    id,
-    cliente
-) => {
-
-    try {
-
-        ////////////////////////////////////////////////////
-        // VALIDAR ID
-        ////////////////////////////////////////////////////
-
-        const numericId = Number(id);
-
-        ////////////////////////////////////////////////////
-
-        if (
-            !Number.isInteger(numericId) ||
-            numericId <= 0
-        ) {
-            throw new Error(
-                "El ID es inválido"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-        // VALIDAR OBJETO
-        ////////////////////////////////////////////////////
-
-        if (
-            !cliente ||
-            typeof cliente !== "object" ||
-            Array.isArray(cliente)
-        ) {
-            throw new Error(
-                "Los datos del cliente son inválidos"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-        // LIMPIAR DATOS
-        ////////////////////////////////////////////////////
-
-        const nombre =
-            cliente.nombre?.trim() || "";
-
-        const apellido =
-            cliente.apellido?.trim() || "";
-
-        const correo =
-            cliente.correo?.trim() || "";
-
-        const telefono =
-            cliente.telefono?.trim() || "";
-
-        ////////////////////////////////////////////////////
-        // VALIDAR EMAIL
-        ////////////////////////////////////////////////////
-
-        if (
-            correo &&
-            !validator.isEmail(correo)
-        ) {
-            throw new Error(
-                "El correo electrónico es inválido"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        const sql = `
-            UPDATE pro_clientes
-            SET
-                pri_nombre = ?,
-                pri_apellido = ?,
-                correo = ?,
-                telefono = ?,
-                updated_at = NOW()
-            WHERE id = ?
-        `;
-
-        ////////////////////////////////////////////////////
-
-        const values = [
-            nombre,
-            apellido,
-            correo,
-            telefono,
-            numericId
-        ];
-
-        ////////////////////////////////////////////////////
-
-        const [result] = await pool.query(
+    const [result] =
+        await pool.query(
             sql,
             values
         );
 
-        ////////////////////////////////////////////////////
-
-        if (
-            !result ||
-            result.affectedRows === 0
-        ) {
-            throw new Error(
-                "Cliente no encontrado"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        return {
-            success: true,
-            message:
-                "Cliente actualizado correctamente",
-            affectedRows:
-                result.affectedRows
-        };
-
-    } catch (error) {
-
-        ////////////////////////////////////////////////////
-
-        console.error(
-            "ERROR ACTUALIZAR CLIENTE:",
-            {
-                id,
-                message: error.message
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        throw new Error(
-            error.message ||
-            "Error al actualizar cliente"
-        );
-    }
+    return result;
 };
 
 ///////////////////////////////////////////////////////////
-// ELIMINAR CLIENTE EN MYSQL
+// ELIMINAR
 ///////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
+export const eliminarCliente =
+async (id) => {
 
-export const eliminarCliente = async (
-    id
-) => {
+    const sql = `
+        DELETE
+        FROM pro_clientes
+        WHERE id_pro_clientes = ?
+    `;
 
-    try {
-
-        ////////////////////////////////////////////////////
-        // VALIDAR ID
-        ////////////////////////////////////////////////////
-
-        const numericId = Number(id);
-
-        ////////////////////////////////////////////////////
-
-        if (
-            !Number.isInteger(numericId) ||
-            numericId <= 0
-        ) {
-            throw new Error(
-                "El ID es inválido"
-            );
-        }
-
-        const cliente =
-               await buscarClientePorId(id);
-
-        if (!cliente) {
-            throw new Error(
-                "Cliente no existe"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        const sql = `
-            DELETE FROM pro_clientes
-            WHERE id = ?
-            LIMIT 1
-        `;
-
-        ////////////////////////////////////////////////////
-
-        const [result] = await pool.query(
+    const [result] =
+        await pool.query(
             sql,
-            [numericId]
+            [Number(id)]
         );
 
-        ////////////////////////////////////////////////////
-        // VALIDAR RESPUESTA MYSQL
-        ////////////////////////////////////////////////////
-
-        if (!result) {
-
-            throw new Error(
-                "Respuesta inválida de MySQL"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-        // VALIDAR ELIMINACIÓN
-        ////////////////////////////////////////////////////
-
-        if (result.affectedRows === 0) {
-
-            throw new Error(
-                "Cliente no encontrado"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        return {
-            success: true,
-            message:
-                "Cliente eliminado correctamente",
-            affectedRows:
-                result.affectedRows
-        };
-
-    } catch (error) {
-
-        ////////////////////////////////////////////////////
-
-        console.error(
-            "ERROR ELIMINAR CLIENTE:",
-            {
-                id,
-                message: error.message
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        throw new Error(
-            error.message ||
-            "Error al eliminar cliente"
-        );
-    }
+    return result;
 };

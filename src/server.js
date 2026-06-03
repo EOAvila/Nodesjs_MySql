@@ -2,6 +2,9 @@ import app from './app.js';
 import { pool } from './config/db.js';
 //import dotenv from 'dotenv';
 import chalk from 'chalk';
+import {
+    iniciarWorker
+} from './jobs/sync.worker.js';
 ////////////////////////////////////////////
 
 //dotenv.config();
@@ -45,7 +48,13 @@ const startServer = async () => {
             console.log(chalk.green(
                 `SERVER IS RUNNING IN PORT: ${PORT}`)
             );
+
+             ///////////////////////////////////////////////////
+
+            iniciarWorker();
         });
+
+
 
     } catch (error) {
 

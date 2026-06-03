@@ -1,22 +1,18 @@
 import { Router } from "express";
 
-import {
-    sincronizarContacto
-} from "../controllers/bitrix.controller.js";
-
-///////////////////////////////////////////////////////////
+import * as BitrixController
+from "../controllers/bitrix.controller.js";
 
 const router = Router();
 
-///////////////////////////////////////////////////////////
-// SINCRONIZAR CONTACTO
-///////////////////////////////////////////////////////////
+router.post(
+    "/webhook",
+    BitrixController.recibirEventoBitrix
+);
 
 router.post(
     "/sincronizar/:id",
-    sincronizarContacto
+    BitrixController.sincronizarContacto
 );
-
-///////////////////////////////////////////////////////////
 
 export default router;

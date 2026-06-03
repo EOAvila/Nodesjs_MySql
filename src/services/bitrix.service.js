@@ -1,312 +1,255 @@
 import axios from "axios";
-import { BITRIX_WEBHOOK_IN } from "../config/bitrix.js";
-import validator from "validator";
 
-///////////////////////////////////////////////////////////
+import {
+    BITRIX_WEBHOOK_IN
+} from "../config/bitrix.js";
 
-if (!BITRIX_WEBHOOK_IN) {
-    throw new Error("BITRIX_WEBHOOK_IN no está definido en .env");
-}
+import {
+    rateLimitBitrix,
+    sleep
+} from "../utils/rateLimiter.js";
 
 ///////////////////////////////////////////////////////////
 
 const bitrixApi = axios.create({
-    baseURL: BITRIX_WEBHOOK_IN,
-    timeout: 15000,
+
+    baseURL:
+        BITRIX_WEBHOOK_IN,
+
+    timeout: 20000,
+
     headers: {
-        "Content-Type": "application/json"
+        "Content-Type":
+            "application/json"
     }
 });
 
-////////////////////////////////////////////////////////////
-//-- Bitrix24 API Service
-//-- Este servicio se encarga de manejar todas las interacciones con la API de Bitrix24, incluyendo:
-//-- - Obtener contactos
-//-- - Crear contactos
-//-- - Actualizar contactos
-//-- - Eliminar contactos
-//-- Además, incluye una función genérica para realizar cualquier solicitud a la API de Bitrix24, manejando errores y validaciones comunes.
-////////////////////////////////////////////////////////////    
+///////////////////////////////////////////////////////////
 
-///////////////////////////////////////////
-// bitrix.service.js
-// bitrix Request Function
-////////////////////////////////////////////
-export const bitrixRequest = async (
+export const bitrixRequest =
+async (
     method,
     data = {}
 ) => {
 
-    try {
+    let retries = 0;
 
-        ////////////////////////////////////////////////////
+    while (retries < 5) {
 
-        if (!method) {
-            throw new Error(
-                "El método de Bitrix es obligatorio"
-            );
-        }
+        try {
 
-        ////////////////////////////////////////////////////
+            await rateLimitBitrix();
 
-        const url =
-            `${BITRIX_WEBHOOK_IN}${method}.json`;
+            const response =
+                await bitrixApi.post(
+                    `${method}.json`,
+                    data
+                );
 
-        ////////////////////////////////////////////////////
+            const responseData =
+                response.data;
 
-        const {
-            data: responseData
-        } = await axios.post(
-            url,
-            data,
-            {
-                timeout: 15000,
-                headers: {
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        if (responseData.error) {
-
-            throw new Error(
-                responseData.error_description ||
-                responseData.error ||
-                "Error desconocido en Bitrix24"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        if (!responseData || typeof responseData !== "object") {
-            throw new Error(
-                "Respuesta inválida de Bitrix24"
-            );
-        }
-
-////////////////////////////////////////////////////
-
-        if (responseData.error) {
-
-            throw new Error(
-                responseData.error_description ||
+            if (
                 responseData.error
-            );
-        }
+            ) {
 
-////////////////////////////////////////////////////
+                throw {
+                    response: {
+                        data:
+                            responseData
+                    }
+                };
+            }
 
-        if (!Object.hasOwn(responseData, "result")) {
+            return responseData.result;
+
+        } catch (error) {
+
+            const bitrixError =
+                error.response?.data?.error;
+
+            ///////////////////////////////////////////////////
+            // RATE LIMIT
+            ///////////////////////////////////////////////////
+
+            if (
+
+                bitrixError ===
+                    "QUERY_LIMIT_EXCEEDED"
+
+                ||
+
+                bitrixError ===
+                    "TOO_MANY_REQUESTS"
+            ) {
+
+                const waitTime =
+
+                    Math.pow(
+                        2,
+                        retries
+                    ) * 5000;
+
+                console.log(
+                    `BITRIX LIMIT: esperando ${waitTime} ms`
+                );
+
+                await sleep(
+                    waitTime
+                );
+
+                retries++;
+
+                continue;
+            }
+
+            ///////////////////////////////////////////////////
 
             throw new Error(
-                "La respuesta no contiene resultados"
+
+                error.response?.data
+                    ?.error_description
+
+                ||
+
+                error.message
+
+                ||
+
+                "Error Bitrix24"
             );
         }
-
-////////////////////////////////////////////////////
-
-        return responseData.result;
-
-    } catch (error) {
-
-        ////////////////////////////////////////////////////
-
-        console.error("BITRIX ERROR:", {
-            method,
-            message: error.message,
-            response: error.response?.data || null
-        });
-
-        ////////////////////////////////////////////////////
-
-        throw new Error(
-            error.response?.data?.error_description ||
-            error.message ||
-            "Error de conexión con Bitrix24"
-        );
     }
+
+    throw new Error(
+        "Número máximo de reintentos alcanzado"
+    );
 };
 
 ///////////////////////////////////////////////////////////
-// GET CONTACT
+// CONTACT GET
 ///////////////////////////////////////////////////////////
-export const obtenerContactoBitrix = async (
-    id
-) => {
 
-    try {
+export const obtenerContactoBitrix =
+async (id) => {
 
-        ////////////////////////////////////////////////////
-
-        if (
-            id === undefined ||
-            id === null
-        ) {
-            throw new Error(
-                "El ID del contacto es obligatorio"
-            );
+    return await bitrixRequest(
+        "crm.contact.get",
+        {
+            id:
+                Number(id)
         }
-
-        ////////////////////////////////////////////////////
-
-        const numericId = Number(id);
-
-        ////////////////////////////////////////////////////
-
-        if (
-            !Number.isInteger(numericId) ||
-            numericId <= 0
-        ) {
-            throw new Error(
-                "El ID del contacto es inválido"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        const contacto = await bitrixRequest(
-            "crm.contact.get",
-            {
-                id: numericId
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        if (
-            !contacto ||
-            Array.isArray(contacto)
-        ) {
-            throw new Error(
-                "Contacto no encontrado en Bitrix24"
-            );
-        }
-
-        ////////////////////////////////////////////////////
-
-        return contacto;
-
-    } catch (error) {
-
-        ////////////////////////////////////////////////////
-
-        console.error(
-            "ERROR OBTENER CONTACTO BITRIX:",
-            {
-                id,
-                message: error.message
-            }
-        );
-
-        ////////////////////////////////////////////////////
-
-        throw new Error(
-            error.message ||
-            "Error al obtener contacto desde Bitrix24"
-        );
-    }
+    );
 };
 
 ///////////////////////////////////////////////////////////
-// CREATE CONTACT
+// CONTACT ADD
 ///////////////////////////////////////////////////////////
 
 export const crearContactoBitrix =
-    async ({
-        nombre,
-        apellido,
-        email,
-        telefono
-    }) => {
+async ({
+    nombre,
+    apellido,
+    correo,
+    telefono
+}) => {
 
-        return await bitrixRequest(
-            "crm.contact.add",
-            {
-                fields: {
+    return await bitrixRequest(
+        "crm.contact.add",
+        {
+            fields: {
 
-                    NAME: nombre,
+                NAME:
+                    nombre,
 
-                    LAST_NAME: apellido || "",
+                LAST_NAME:
+                    apellido,
 
-                    OPENED: "Y",
-
-                    TYPE_ID: "CLIENT",
-
-                    SOURCE_ID: "WEB",
-
-                    PHONE: telefono
+                EMAIL:
+                    correo
                         ? [{
-                            VALUE: telefono,
-                            VALUE_TYPE: "WORK"
+                            VALUE:
+                                correo,
+                            VALUE_TYPE:
+                                "WORK"
                         }]
                         : [],
 
-                    EMAIL: [{
-                        VALUE: email,
-                        VALUE_TYPE: "WORK"
-                    }]
-                }
+                PHONE:
+                    telefono
+                        ? [{
+                            VALUE:
+                                telefono,
+                            VALUE_TYPE:
+                                "WORK"
+                        }]
+                        : []
             }
-        );
-    };
+        }
+    );
+};
 
 ///////////////////////////////////////////////////////////
-// UPDATE CONTACT
+// CONTACT UPDATE
 ///////////////////////////////////////////////////////////
 
 export const actualizarContactoBitrix =
-    async (
-        id,
+async (
+    id,
+    datos
+) => {
+
+    return await bitrixRequest(
+        "crm.contact.update",
         {
-            nombre,
-            apellido,
-            email,
-            telefono
-        }
-    ) => {
 
-        return await bitrixRequest(
-            "crm.contact.update",
-            {
-                id: Number(id),
+            id:
+                Number(id),
 
-                fields: {
+            fields: {
 
-                    NAME: nombre,
+                NAME:
+                    datos.nombre,
 
-                    LAST_NAME: apellido,
+                LAST_NAME:
+                    datos.apellido,
 
-                    PHONE: telefono
+                EMAIL:
+                    datos.correo
                         ? [{
-                            VALUE: telefono,
-                            VALUE_TYPE: "WORK"
+                            VALUE:
+                                datos.correo,
+                            VALUE_TYPE:
+                                "WORK"
                         }]
                         : [],
 
-                    EMAIL: email
+                PHONE:
+                    datos.telefono
                         ? [{
-                            VALUE: email,
-                            VALUE_TYPE: "WORK"
+                            VALUE:
+                                datos.telefono,
+                            VALUE_TYPE:
+                                "WORK"
                         }]
                         : []
-                }
             }
-        );
-    };
+        }
+    );
+};
 
 ///////////////////////////////////////////////////////////
-// DELETE CONTACT
+// CONTACT DELETE
 ///////////////////////////////////////////////////////////
 
 export const eliminarContactoBitrix =
-    async (id) => {
+async (id) => {
 
-        return await bitrixRequest(
-            "crm.contact.delete",
-            {
-                id: Number(id)
-            }
-        );
-    };
+    return await bitrixRequest(
+        "crm.contact.delete",
+        {
+            id:
+                Number(id)
+        }
+    );
+};
