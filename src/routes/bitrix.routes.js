@@ -16,6 +16,14 @@ router.post(
 );
 
 //export default router;
+router.get('/', (req, res) => {
+
+    res.status(200).json({
+        success: true,
+        message: 'Webhook funcionando'
+    });
+
+});
 
 router.post('/', async (req, res) => {
 
