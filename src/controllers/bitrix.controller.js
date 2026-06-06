@@ -19,7 +19,35 @@ async (req, res) => {
 
     try {
 
+        console.log("QUERY:", req.query);
+        console.log("BODY:", req.body);
+        return res.status(200).json({
+            success: true,
+            query: req.query,
+            body: req.body
+        });
+
         const event =
+            req.body.event ||
+            req.query.event;
+
+        const entityId =
+            req.body.data?.FIELDS?.ID ||
+            req.query.contact_id;
+
+        console.log({
+            event,
+            entityId
+        });
+
+        if (!entityId) {
+            return res.status(400).json({
+                success: false,
+                message: "ID no recibido"
+            });
+        }
+
+/*        const event =
             req.body.event;
 
         const entityId =
@@ -37,7 +65,7 @@ async (req, res) => {
                     "Evento inválido"
             });
         }
-
+*/
         ///////////////////////////////////////////////////
         // CONTACTOS
         ///////////////////////////////////////////////////

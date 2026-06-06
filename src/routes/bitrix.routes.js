@@ -40,6 +40,19 @@ router.post('/', async (req, res) => {
 
 });
 
+router.post("/", async (req, res) => {
+
+    const contactId = req.query.contact_id;
+
+    console.log("CONTACT ID:", contactId);
+
+    return res.status(200).json({
+        success: true,
+        contactId
+    });
+
+});
+
 
 router.post('/', async (req, res) => {
 
