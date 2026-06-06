@@ -40,11 +40,11 @@ app.use(express.urlencoded({
 // RUTAS
 ///////////////////////////////////////////////////////////
 
-app.use("/api/", indexRoutes);
+app.use("/", indexRoutes);
 
-app.use("/webhook/bitrix", bitrixRoutes);
+app.use("/bitrix", bitrixRoutes);
 
-app.use("/api/clientes", clientesRoutes);
+app.use("/clientes", clientesRoutes);
 
 ///////////////////////////////////////////////////////////
 // HEALTH CHECK
