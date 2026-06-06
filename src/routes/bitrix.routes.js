@@ -6,7 +6,7 @@ from "../controllers/bitrix.controller.js";
 const router = Router();
 
 router.post(
-    "/webhook",
+    "/",
     BitrixController.recibirEventoBitrix
 );
 
