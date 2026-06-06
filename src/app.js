@@ -42,8 +42,15 @@ app.use(express.urlencoded({
 
 app.use("/api/", indexRoutes);
 
-app.use("/webhook", bitrixRoutes);
-//app.use("/webhook/bitrix", bitrixRoutes);
+app.use("/webhook/bitrix", bitrixRoutes);
+app.get("/webhook/test", (req, res) => {
+
+    res.json({
+        success: true,
+        message: "Webhook registrado"
+    });
+
+});
 
 app.use("/api/clientes", clientesRoutes);
 
