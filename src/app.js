@@ -42,7 +42,7 @@ app.use(express.urlencoded({
 
 app.use("/api/", indexRoutes);
 
-app.use("/api/bitrix", bitrixRoutes);
+app.use("/webhook/bitrix", bitrixRoutes);
 
 app.use("/api/clientes", clientesRoutes);
 
@@ -90,7 +90,7 @@ app.use((error, req, res, next) => {
 
 ///////////////////////////////////////////////////////////
 app.get(
-    "/api/health",
+    "/health",
     (req,res)=>{
 
         res.status(200)
