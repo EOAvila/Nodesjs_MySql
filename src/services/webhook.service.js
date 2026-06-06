@@ -15,13 +15,17 @@ export const guardarEvento = async ({
         (
             entity_type,
             entity_id,
-            event_type
+            event_type,
+            status,
+            created_at
         )
         VALUES
         (
             ?,
             ?,
-            ?
+            ?,
+            'PENDING',
+            NOW()
         )
     `;
 
