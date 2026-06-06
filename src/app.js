@@ -40,17 +40,17 @@ app.use(express.urlencoded({
 // RUTAS
 ///////////////////////////////////////////////////////////
 
-app.use("/", indexRoutes);
+app.use("/api/", indexRoutes);
 
-app.use("/bitrix", bitrixRoutes);
+app.use("/webhook/bitrix", bitrixRoutes);
 
-app.use("/clientes", clientesRoutes);
+app.use("/api/clientes", clientesRoutes);
 
 ///////////////////////////////////////////////////////////
 // HEALTH CHECK
 ///////////////////////////////////////////////////////////
 
-app.get("/", (req, res) => {
+app.get("/api/health", (req, res) => {
 
     res.status(200).json({
         success: true,
@@ -90,7 +90,7 @@ app.use((error, req, res, next) => {
 
 ///////////////////////////////////////////////////////////
 app.get(
-    "/health",
+    "/api/health",
     (req,res)=>{
 
         res.status(200)
