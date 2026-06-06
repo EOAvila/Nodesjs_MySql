@@ -42,7 +42,8 @@ app.use(express.urlencoded({
 
 app.use("/api/", indexRoutes);
 
-app.use("/webhook/bitrix", bitrixRoutes);
+app.use("/webhook", bitrixRoutes);
+//app.use("/webhook/bitrix", bitrixRoutes);
 
 app.use("/api/clientes", clientesRoutes);
 
