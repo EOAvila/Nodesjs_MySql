@@ -21,11 +21,11 @@ async (req, res) => {
 
         console.log("QUERY:", req.query);
         console.log("BODY:", req.body);
-        return res.status(200).json({
-            success: true,
-            query: req.query,
-            body: req.body
-        });
+//        return res.status(200).json({
+//            success: true,
+//            query: req.query,
+//            body: req.body
+//        });
 
         const event =
             req.body.event ||
@@ -75,6 +75,10 @@ async (req, res) => {
                 "ONCRMCONTACT"
             )
         ) {
+            console.log({
+                    event,
+                    entityId
+            });
 
             await guardarEvento({
 

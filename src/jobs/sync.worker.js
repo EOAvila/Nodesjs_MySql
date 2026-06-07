@@ -113,6 +113,7 @@ async () => {
 
     try {
 
+        console.log("WORKER EJECUTANDO...");
         const eventos =
             await obtenerEventosPendientes();
 
@@ -122,6 +123,10 @@ async () => {
             return;
         }
 
+        console.log(
+                "EVENTOS ENCONTRADOS:",
+                eventos.length
+        );
         ///////////////////////////////////////////////////
 
         console.log(
