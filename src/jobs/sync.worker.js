@@ -113,7 +113,7 @@ async () => {
 
     try {
 
-        console.log("WORKER EJECUTANDO...");
+//        console.log("WORKER EJECUTANDO...");
         const eventos =
             await obtenerEventosPendientes();
 
@@ -123,10 +123,10 @@ async () => {
             return;
         }
 
-        console.log(
-                "EVENTOS ENCONTRADOS:",
-                eventos.length
-        );
+//        console.log(
+//            "EVENTOS ENCONTRADOS:",
+//            eventos.length
+//        );
         ///////////////////////////////////////////////////
 
         console.log(
@@ -174,3 +174,86 @@ export const iniciarWorker = () => {
         5000
     );
 };
+
+/////////////////////////////////////////////////////
+
+const procesarLead =
+async (entityId) => {
+
+    const lead =
+        await obtenerLeadBitrix(entityId);
+
+    await upsertLead({
+        bitrix_id: Number(lead.ID),
+        titulo: lead.TITLE,
+        nombre: lead.NAME,
+        apellido: lead.LAST_NAME
+    });
+};
+
+/////////////////////////////////////////////////////
+
+const procesarDeal =
+async (entityId) => {
+
+    const deal =
+        await obtenerDealBitrix(entityId);
+
+    await upsertDeal({
+        bitrix_id: Number(deal.ID),
+        titulo: deal.TITLE,
+        opportunity: deal.OPPORTUNITY
+    });
+};
+
+/////////////////////////////////////////////////////
+
+const procesarCompany =
+async (entityId) => {
+
+    const company =
+        await obtenerCompanyBitrix(entityId);
+
+    await upsertCompany({
+        bitrix_id: Number(company.ID),
+        title: company.TITLE
+    });
+};
+
+////////////////////////////////////////////////////
+
+const procesarProducto =
+async (entityId) => {
+
+    const producto =
+        await obtenerProductoBitrix(entityId);
+
+    await upsertProducto({
+        bitrix_id: Number(producto.ID),
+        name: producto.NAME
+    });
+};
+
+/*switch (evento.entity_type) {
+
+    case "CONTACT":
+        await procesarContacto(evento.entity_id);
+        break;
+
+    case "LEAD":
+        await procesarLead(evento.entity_id);
+        break;
+
+    case "DEAL":
+        await procesarDeal(evento.entity_id);
+        break;
+
+    case "COMPANY":
+        await procesarCompany(evento.entity_id);
+        break;
+
+    case "PRODUCT":
+        await procesarProducto(evento.entity_id);
+        break;
+}
+*/

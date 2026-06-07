@@ -39,56 +39,56 @@ async (req, res) => {
             event,
             entityId
         });
-
-        if (!entityId) {
+        //////////////////////////////////////////////////
+        // Valida que el evento y el ID estén presentes //
+        //////////////////////////////////////////////////
+        if (!event || !entityId) {
             return res.status(400).json({
                 success: false,
-                message: "ID no recibido"
+                message: "Evento inválido"
             });
         }
 
-/*        const event =
-            req.body.event;
-
-        const entityId =
-            req.body.data?.FIELDS?.ID;
-
-        if (
-            !event ||
-            !entityId
-        ) {
-
-            return res.status(400)
-            .json({
-                success:false,
-                message:
-                    "Evento inválido"
-            });
-        }
-*/
+        let entityType = null;
         ///////////////////////////////////////////////////
         // CONTACTOS
         ///////////////////////////////////////////////////
-
-        if (
-            event.startsWith(
-                "ONCRMCONTACT"
-            )
-        ) {
-            console.log({
-                    event,
-                    entityId
-            });
+        if (event.startsWith("ONCRMCONTACT")) {
+            entityType = "CONTACT";
+        }
+        ///////////////////////////////////////////////////
+        // LEAD
+        ///////////////////////////////////////////////////
+        if (event.startsWith("ONCRMLEAD")) {
+            entityType = "LEAD";
+        }
+        ///////////////////////////////////////////////////
+        // DEAL
+        ///////////////////////////////////////////////////
+        if (event.startsWith("ONCRMDEAL")) {
+            entityType = "DEAL";
+        }
+        ///////////////////////////////////////////////////
+        // COMPANY
+        ///////////////////////////////////////////////////
+        if (event.startsWith("ONCRMCOMPANY")) {
+            entityType = "COMPANY";
+        }
+        ///////////////////////////////////////////////////
+        // PRODUCT
+        ///////////////////////////////////////////////////
+        if (event.startsWith("ONCRMPRODUCT")) {
+            entityType = "PRODUCT";
+        }
+        ///////////////////////////////////////////////////
+        // GUARDAR EVENTO
+        ///////////////////////////////////////////////////
+        if (entityType) {
 
             await guardarEvento({
-
-                entityType:
-                    "CONTACT",
-
+                entityType,
                 entityId,
-
-                eventType:
-                    event
+                eventType: event
             });
         }
 

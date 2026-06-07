@@ -253,3 +253,63 @@ async (id) => {
         }
     );
 };
+
+//////////////////////////////////////////////////////////
+// OBTENER LEAD
+///////////////////////////////////////////////////////////
+export const obtenerLeadBitrix =
+async (id) => {
+
+    return await bitrixRequest(
+        "crm.lead.get",
+        {
+            id: Number(id)
+        }
+    );
+};
+
+
+
+//////////////////////////////////////////////////////////
+// OBTENER DEAL
+///////////////////////////////////////////////////////////
+export const obtenerDealBitrix =
+async (id) => {
+
+    return await bitrixRequest(
+        "crm.deal.get",
+        {
+            id: Number(id)
+        }
+    );
+};
+
+
+//////////////////////////////////////////////////////////
+// OBTENER COMPANY
+///////////////////////////////////////////////////////////
+export const obtenerCompanyBitrix =
+async (id) => {
+
+    return await bitrixRequest(
+        "crm.company.get",
+        {
+            id: Number(id)
+        }
+    );
+};
+
+
+//////////////////////////////////////////////////////////
+// OBTENER PRODUCTO
+///////////////////////////////////////////////////////////
+export const obtenerProductoBitrix =
+async (id) => {
+
+    return await bitrixRequest(
+        "crm.product.get",
+        {
+            id: Number(id)
+        }
+    );
+};

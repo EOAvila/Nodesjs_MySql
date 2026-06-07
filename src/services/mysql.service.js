@@ -158,3 +158,88 @@ async (id) => {
 
     return result;
 };
+/////////////////////////////////////////////////////////////////
+
+export const upsertLead = async (lead) => {
+
+    await pool.query(`
+        INSERT INTO leads
+        (
+            bitrix_id,
+            titulo,
+            nombre,
+            apellido
+        )
+        VALUES (?, ?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            titulo = VALUES(titulo),
+            nombre = VALUES(nombre),
+            apellido = VALUES(apellido)
+    `,[
+        lead.bitrix_id,
+        lead.titulo,
+        lead.nombre,
+        lead.apellido
+    ]);
+};
+
+////////////////////////////////////////////////////////////////
+
+export const upsertDeal = async (deal) => {
+
+    await pool.query(`
+        INSERT INTO deals
+        (
+            bitrix_id,
+            titulo,
+            opportunity
+        )
+        VALUES (?, ?, ?)
+        ON DUPLICATE KEY UPDATE
+            titulo = VALUES(titulo),
+            opportunity = VALUES(opportunity)
+    `,[
+        deal.bitrix_id,
+        deal.titulo,
+        deal.opportunity
+    ]);
+};
+
+/////////////////////////////////////////////////////////////////
+
+export const upsertCompany = async (company) => {
+
+    await pool.query(`
+        INSERT INTO companies
+        (
+            bitrix_id,
+            title
+        )
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE
+            title = VALUES(title)
+    `,[
+        company.bitrix_id,
+        company.title
+    ]);
+};
+
+/////////////////////////////////////////////////////////////////
+
+export const upsertProducto = async (producto) => {
+
+    await pool.query(`
+        INSERT INTO products
+        (
+            bitrix_id,
+            name
+        )
+        VALUES (?, ?)
+        ON DUPLICATE KEY UPDATE
+            name = VALUES(name)
+    `,[
+        producto.bitrix_id,
+        producto.name
+    ]);
+};
+
