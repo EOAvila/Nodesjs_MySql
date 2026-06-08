@@ -25,10 +25,21 @@ router.get('/', (req, res) => {
 
 });
 
+router.post("/", BitrixController.recibirEventoBitrix);
+
+router.post(
+    "/sincronizar/:id",
+    BitrixController.sincronizarContacto
+);
+
+/////////////////////////////////////////
 router.post('/', async (req, res) => {
 
     console.log('HEADERS:');
     console.log(req.headers);
+
+    console.log("QUERY:");
+    console.log(JSON.stringify(req.query, null, 2));
 
     console.log('BODY:');
     console.log(JSON.stringify(req.body, null, 2));
@@ -108,4 +119,21 @@ router.post('/', async (req, res) => {
     }
 });
 
+/*
+//////////////////////////////////////////////
+router.post("/:evento", async (req, res) => {
+
+    console.log("EVENTO URL:", req.params.evento);
+
+    console.log("BODY:");
+    console.log(JSON.stringify(req.body, null, 2));
+
+    return res.status(200).json({
+        success: true,
+        evento: req.params.evento
+    });
+
+});
+*/
+////////////////////////
 export default router;

@@ -11,7 +11,6 @@ import {
     upsertCliente
 } from "../services/mysql.service.js";
 
-
 ///////////////////////////////////////////////////
 
 export const recibirEventoBitrix =
