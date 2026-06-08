@@ -12,7 +12,7 @@ import {
 } from "../services/mysql.service.js";
 
 ///////////////////////////////////////////////////
-
+/*
 export const recibirEventoBitrix = async (req, res) => {
 
     console.log("================================");
@@ -32,16 +32,30 @@ export const recibirEventoBitrix = async (req, res) => {
         recibido: true
     });
 };
-
+*/
 ///////////////////////////////////////////////////
-/*
+
 export const recibirEventoBitrix =
 async (req, res) => {
 
     try {
 
+        console.log("================================");
+        console.log("HEADERS");
+        console.log(JSON.stringify(req.headers, null, 2));
+
+        console.log("QUERY");
+        console.log(JSON.stringify(req.query, null, 2));
+
+        console.log("BODY");
+        console.log(JSON.stringify(req.body, null, 2));
+
+        console.log("================================");
+
+/*        console.log("HEADERS:", req.headers);
         console.log("QUERY:", req.query);
         console.log("BODY:", req.body);
+        */
 //        return res.status(200).json({
 //            success: true,
 //            query: req.query,
@@ -129,7 +143,7 @@ async (req, res) => {
         .send();
     }
 };
-*/
+
 
 ///////////////////////////////////////////////////////////
 
@@ -143,34 +157,34 @@ async (req, res) => {
         const contacto =
             await obtenerContactoBitrix(id);
 
-        await upsertCliente({
+            await upsertCliente({
 
-            bitrix_id:
-                Number(contacto.ID),
+                bitrix_id:
+                    Number(contacto.ID),
 
-            nombre:
-                contacto.NAME || "",
+                nombre:
+                    contacto.NAME || "",
 
-            apellido:
-                contacto.LAST_NAME || "",
+                apellido:
+                    contacto.LAST_NAME || "",
 
-            correo:
-                contacto.EMAIL?.[0]?.VALUE || "",
+                correo:
+                    contacto.EMAIL?.[0]?.VALUE || "",
 
-            telefono:
-                contacto.PHONE?.[0]?.VALUE || ""
-        });
+                telefono:
+                    contacto.PHONE?.[0]?.VALUE || ""
+            });
 
-        return res.status(200).json({
+            return res.status(200).json({
 
-            success: true,
+                success: true,
 
-            message:
-                "Contacto sincronizado",
+                message:
+                    "Contacto sincronizado",
 
-            bitrixId:
-                contacto.ID
-        });
+                bitrixId:
+                    contacto.ID
+            });
 
     } catch (error) {
 

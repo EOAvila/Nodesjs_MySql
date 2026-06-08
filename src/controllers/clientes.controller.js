@@ -54,7 +54,7 @@ export const insertarClienteController = async (req, res) => {
         ///////////////////////////////////////////////////
         // CREAR EN BITRIX
         ///////////////////////////////////////////////////
-
+/*
         const bitrixId =
             await crearContactoBitrix({
 
@@ -63,7 +63,7 @@ export const insertarClienteController = async (req, res) => {
                 correo,
                 telefono
             });
-
+*/
         ///////////////////////////////////////////////////
         // GUARDAR EN MYSQL
         ///////////////////////////////////////////////////
