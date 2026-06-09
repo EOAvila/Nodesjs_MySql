@@ -65,6 +65,32 @@ async (
 
         } catch (error) {
 
+            console.log(
+                "BITRIX RESPONSE:",
+                JSON.stringify(
+                    error.response?.data,
+                    null,
+                    2
+                )
+            );
+
+            throw new Error(
+
+                error.response?.data
+                    ?.error_description
+
+                ||
+
+                error.message
+
+                ||
+
+                "Error Bitrix24"
+            );
+        }
+
+        /*catch (error) {
+
             const bitrixError =
                 error.response?.data?.error;
 
@@ -118,12 +144,13 @@ async (
 
                 "Error Bitrix24"
             );
-        }
-    }
+        }*/
+ /*   }
 
     throw new Error(
         "Número máximo de reintentos alcanzado"
-    );
+    );*/
+    }
 };
 
 ///////////////////////////////////////////////////////////
@@ -132,14 +159,24 @@ async (
 
 export const obtenerContactoBitrix =
 async (id) => {
+    try {   
+        
+        console.log("ID RECIBIDO:", id);
+        console.log("URL BITRIX:", BITRIX_WEBHOOK_IN);
 
-    return await bitrixRequest(
-        "crm.contact.get",
-        {
-            id:
-                Number(id)
-        }
-    );
+        return await bitrixRequest(
+                "crm.contact.get",
+                {
+                    id:
+                        Number(id)
+                }
+            );
+        } catch (error) {
+            console.error("BITRIX ERROR:");
+            console.error(error.response?.data);
+
+            throw error;
+            }
 };
 
 ///////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@ import { bitrixRequest } from '../services/bitrix.service.js'
 //////////////////////////////////////////////////////////
 // LISTAR MYSQL
 //////////////////////////////////////////////////////////
-export const getContacts = async (req, res) => {
+export const getContact = async (req, res) => {
 
     try {
 
