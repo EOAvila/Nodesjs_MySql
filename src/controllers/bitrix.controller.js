@@ -13,7 +13,7 @@ import {
 
 import {
     procesarEntidadBitrix
-} from "./clientes.controller.js";
+} from "../services/entitySync.service.js";
 
 ///////////////////////////////////////////////////
 export const recibirEventoBitrix = async (req, res) => {
