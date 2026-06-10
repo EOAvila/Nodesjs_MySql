@@ -12,6 +12,98 @@ import {
 } from "../services/mysql.service.js";
 
 ///////////////////////////////////////////////////
+export const recibirEventoBitrix = async (req, res) => {
+
+    try {
+
+        let event = null;
+        let entityId = null;
+        let entityType = null;
+
+        ////////////////////////////////////////////////////
+        // WEBHOOK CRM
+        ////////////////////////////////////////////////////
+
+        if (req.body.event) {
+
+            event = req.body.event;
+
+            entityId =
+                req.body.data?.FIELDS?.ID ||
+                req.body.data?.FIELDS?.CONTACT_ID ||
+                req.body.data?.FIELDS?.COMPANY_ID;
+
+        }
+
+        ////////////////////////////////////////////////////
+        // BUSINESS PROCESS / ROBOT
+        ////////////////////////////////////////////////////
+
+        else if (req.body.document_id) {
+
+            const documentId = req.body.document_id;
+
+            const code = documentId[2];
+
+            if (code.startsWith("DEAL_")) {
+
+                entityType = "DEAL";
+
+                entityId = Number(
+                    code.replace("DEAL_", "")
+                );
+
+            }
+
+            if (code.startsWith("CONTACT_")) {
+
+                entityType = "CONTACT";
+
+                entityId = Number(
+                    code.replace("CONTACT_", "")
+                );
+
+            }
+
+            event = "BUSINESS_PROCESS";
+
+        }
+
+        console.log({
+            event,
+            entityType,
+            entityId
+        });
+
+        if (!entityId) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Evento inválido"
+            });
+
+        }
+
+        return res.json({
+            success: true
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
+
+
+
 /*
 export const recibirEventoBitrix = async (req, res) => {
 
@@ -33,9 +125,14 @@ export const recibirEventoBitrix = async (req, res) => {
     });
 };
 */
+
+
+
+
+
 ///////////////////////////////////////////////////
 
-export const recibirEventoBitrix =
+/*export const recibirEventoBitrix =
 async (req, res) => {
 
     try {
@@ -52,10 +149,10 @@ async (req, res) => {
 
         console.log("================================");
 
-/*        console.log("HEADERS:", req.headers);
-        console.log("QUERY:", req.query);
-        console.log("BODY:", req.body);
-        */
+//        console.log("HEADERS:", req.headers);
+//        console.log("QUERY:", req.query);
+//        console.log("BODY:", req.body);
+//        
 //        return res.status(200).json({
 //            success: true,
 //            query: req.query,
@@ -143,6 +240,7 @@ async (req, res) => {
         .send();
     }
 };
+*/
 
 
 ///////////////////////////////////////////////////////////
