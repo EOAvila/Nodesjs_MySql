@@ -49,6 +49,17 @@ async (
             const responseData =
                 response.data;
 
+            console.log(
+                    "METHOD:",
+                        method
+            );
+
+            console.log(
+                    "DATA:",
+                        JSON.stringify(data)
+            );
+
+
             if (
                 responseData.error
             ) {
@@ -150,8 +161,10 @@ async (
     throw new Error(
         "Número máximo de reintentos alcanzado"
     );*/
+    
     }
 };
+
 
 ///////////////////////////////////////////////////////////
 // CONTACT GET
@@ -163,6 +176,13 @@ async (id) => {
         
         console.log("ID RECIBIDO:", id);
         console.log("URL BITRIX:", BITRIX_WEBHOOK_IN);
+
+        console.log(
+            "ENTITY ID:",
+                entityId,
+            "TYPE:",
+                typeof entityId
+            );
 
         return await bitrixRequest(
                 "crm.contact.get",
