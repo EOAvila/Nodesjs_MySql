@@ -25,7 +25,6 @@ const bitrixApi = axios.create({
 });
 
 ///////////////////////////////////////////////////////////
-
 export const bitrixRequest =
 async (
     method,
@@ -181,9 +180,7 @@ async (
 //    return response.data.result;
 //};
 
-
-
-
+////////////////////////////////////////////////////////////////////
 export const obtenerContactoBitrix =
 async (id) => {
     try {   
@@ -193,13 +190,13 @@ async (id) => {
 
         console.log(
             "ENTITY ID:",
-                entityId,
+                id,
             "TYPE:",
-                typeof entityId
+                typeof id
             );
 
         return await bitrixRequest(
-                "crm.contact.get.json",
+                "crm.contact.get",
                 {
                     id:
                         Number(id)
@@ -216,7 +213,6 @@ async (id) => {
 ///////////////////////////////////////////////////////////
 // CONTACT ADD
 ///////////////////////////////////////////////////////////
-
 export const crearContactoBitrix =
 async ({
     nombre,
@@ -226,7 +222,7 @@ async ({
 }) => {
 
     return await bitrixRequest(
-        "crm.contact.add.json",
+        "crm.contact.add",
         {
             fields: {
 
@@ -263,7 +259,6 @@ async ({
 ///////////////////////////////////////////////////////////
 // CONTACT UPDATE
 ///////////////////////////////////////////////////////////
-
 export const actualizarContactoBitrix =
 async (
     id,
@@ -271,7 +266,7 @@ async (
 ) => {
 
     return await bitrixRequest(
-        "crm.contact.update.json",
+        "crm.contact.update",
         {
 
             id:
@@ -312,12 +307,11 @@ async (
 ///////////////////////////////////////////////////////////
 // CONTACT DELETE
 ///////////////////////////////////////////////////////////
-
 export const eliminarContactoBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.contact.delete.json",
+        "crm.contact.delete",
         {
             id:
                 Number(id)
@@ -332,14 +326,12 @@ export const obtenerLeadBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.lead.get.json",
+        "crm.lead.get",
         {
             id: Number(id)
         }
     );
 };
-
-
 
 //////////////////////////////////////////////////////////
 // OBTENER DEAL
@@ -348,14 +340,12 @@ export const obtenerDealBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.deal.get.json",
+        "crm.deal.get",
         {
             id: Number(id)
         }
     );
 };
-
-
 //////////////////////////////////////////////////////////
 // OBTENER COMPANY
 ///////////////////////////////////////////////////////////
@@ -363,13 +353,12 @@ export const obtenerCompanyBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.company.get.json",
+        "crm.company.get",
         {
             id: Number(id)
         }
     );
 };
-
 
 //////////////////////////////////////////////////////////
 // OBTENER PRODUCTO
@@ -378,7 +367,7 @@ export const obtenerProductoBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.product.get.json",
+        "crm.product.get",
         {
             id: Number(id)
         }

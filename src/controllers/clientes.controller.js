@@ -1,12 +1,6 @@
 // src/controllers/clientes.controller.js
 import validator from "validator";
-/*
-import {
-    upsertCliente,
-    eliminarCliente,
-    buscarClientePorId
-} from "../services/mysql.service.js";
-*/
+//////////////////////////////////
 import {
     upsertCliente,
     eliminarCliente,
@@ -17,15 +11,6 @@ import {
     upsertProducto
 }
 from "../services/mysql.service.js";
-//////////////////////////////
-//////////////////////////////
-/*
-import {
-    crearContactoBitrix,
-    actualizarContactoBitrix,
-    eliminarContactoBitrix
-} from "../services/bitrix.service.js";
-*/
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 import {

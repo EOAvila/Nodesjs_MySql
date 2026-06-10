@@ -11,6 +11,10 @@ import {
     upsertCliente
 } from "../services/mysql.service.js";
 
+import {
+    procesarEntidadBitrix
+} from "./clientes.controller.js";
+
 ///////////////////////////////////////////////////
 export const recibirEventoBitrix = async (req, res) => {
 

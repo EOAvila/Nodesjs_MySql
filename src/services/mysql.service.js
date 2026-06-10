@@ -52,7 +52,84 @@ async (id) => {
 ///////////////////////////////////////////////////////////
 // UPSERT CLIENTE
 ///////////////////////////////////////////////////////////
-export const upsertCliente =
+export const upsertCliente = async ({
+    bitrix_id,
+    nombre,
+    apellido,
+    correo,
+    telefono
+}) => {
+
+    if (
+        bitrix_id === null ||
+        bitrix_id === undefined
+    ) {
+        throw new Error(
+            "bitrix_id requerido"
+        );
+    }
+
+    correo = correo?.trim() || "";
+
+    if (
+        correo &&
+        !validator.isEmail(correo)
+    ) {
+        throw new Error(
+            "Correo inválido"
+        );
+    }
+
+    const sql = `
+        INSERT INTO pro_clientes
+        (
+            bitrix_id,
+            pri_nombre,
+            pri_apellido,
+            correo,
+            telefono
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?
+        )
+        ON DUPLICATE KEY UPDATE
+
+            pri_nombre =
+                VALUES(pri_nombre),
+
+            pri_apellido =
+                VALUES(pri_apellido),
+
+            correo =
+                VALUES(correo),
+
+            telefono =
+                VALUES(telefono),
+
+            updated_at =
+                NOW()
+    `;
+
+    const [result] =
+        await pool.query(sql, [
+
+            Number(bitrix_id),
+
+            nombre?.trim() || "",
+
+            apellido?.trim() || "",
+
+            correo,
+
+            telefono?.trim() || ""
+        ]);
+
+    return result;
+};
+
+///////////////////////////////////////////////////
+/*export const upsertCliente =
 async ({
     bitrix_id,
     nombre,
@@ -133,6 +210,7 @@ async ({
 
     return result;
 };
+*/
 
 ///////////////////////////////////////////////////////////
 // ELIMINAR
