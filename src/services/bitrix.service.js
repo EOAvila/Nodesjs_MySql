@@ -169,6 +169,20 @@ async (
 ///////////////////////////////////////////////////////////
 // CONTACT GET
 ///////////////////////////////////////////////////////////
+//export const obtenerContactoBitrix = async (id) => {
+
+//    const response = await axios.get(
+//        `${WEBHOOK}/crm.contact.get.json`,
+//        {
+//            params: { id }
+//        }
+//    );
+
+//    return response.data.result;
+//};
+
+
+
 
 export const obtenerContactoBitrix =
 async (id) => {
@@ -185,7 +199,7 @@ async (id) => {
             );
 
         return await bitrixRequest(
-                "crm.contact.get",
+                "crm.contact.get.json",
                 {
                     id:
                         Number(id)
@@ -212,7 +226,7 @@ async ({
 }) => {
 
     return await bitrixRequest(
-        "crm.contact.add",
+        "crm.contact.add.json",
         {
             fields: {
 
@@ -257,7 +271,7 @@ async (
 ) => {
 
     return await bitrixRequest(
-        "crm.contact.update",
+        "crm.contact.update.json",
         {
 
             id:
@@ -303,7 +317,7 @@ export const eliminarContactoBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.contact.delete",
+        "crm.contact.delete.json",
         {
             id:
                 Number(id)
@@ -318,7 +332,7 @@ export const obtenerLeadBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.lead.get",
+        "crm.lead.get.json",
         {
             id: Number(id)
         }
@@ -334,7 +348,7 @@ export const obtenerDealBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.deal.get",
+        "crm.deal.get.json",
         {
             id: Number(id)
         }
@@ -349,7 +363,7 @@ export const obtenerCompanyBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.company.get",
+        "crm.company.get.json",
         {
             id: Number(id)
         }
@@ -364,7 +378,7 @@ export const obtenerProductoBitrix =
 async (id) => {
 
     return await bitrixRequest(
-        "crm.product.get",
+        "crm.product.get.json",
         {
             id: Number(id)
         }

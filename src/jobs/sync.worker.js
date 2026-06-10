@@ -61,48 +61,40 @@ async (entityId) => {
 };
 
 ///////////////////////////////////////////////////////////
-
-const procesarEvento =
-async (evento) => {
+const procesarEvento = async (evento) => {
 
     try {
 
-        await marcarProcesando(
-            evento.id
-        );
+        console.log("=================================");
+        console.log("EVENTO ID:", evento.id);
+        console.log("ENTITY TYPE:", evento.entity_type);
+        console.log("ENTITY ID:", evento.entity_id);
+        console.log("=================================");
 
-        ///////////////////////////////////////////////////
-        // CONTACTOS
-        ///////////////////////////////////////////////////
+        await marcarProcesando(evento.id);
 
-        if (
-            evento.entity_type ===
-            "CONTACT"
-        ) {
+        if (evento.entity_type === "CONTACT") {
 
             await procesarContacto(
                 evento.entity_id
             );
         }
 
-        ///////////////////////////////////////////////////
-
-        await marcarDone(
-            evento.id
-        );
+        await marcarDone(evento.id);
 
     } catch (error) {
 
         console.error(
-
-            `ERROR EVENTO ${evento.id}:`,
-
-            error.message
+            `ERROR EVENTO ${evento.id}:`
         );
 
-        await marcarFailed(
-            evento.id
+        console.error(
+            error.response?.data ||
+            error.message ||
+            error
         );
+
+        await marcarFailed(evento.id);
     }
 };
 

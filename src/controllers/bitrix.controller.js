@@ -16,6 +16,85 @@ export const recibirEventoBitrix = async (req, res) => {
 
     try {
 
+        let entityType = null;
+        let entityId = null;
+
+        //////////////////////////////////////////////////////
+        // BUSINESS PROCESS
+        //////////////////////////////////////////////////////
+
+        if (req.body.document_id) {
+
+            const code = req.body.document_id[2];
+
+            if (code.startsWith("DEAL_")) {
+                entityType = "DEAL";
+                entityId = Number(code.replace("DEAL_", ""));
+            }
+
+            else if (code.startsWith("CONTACT_")) {
+                entityType = "CONTACT";
+                entityId = Number(code.replace("CONTACT_", ""));
+            }
+
+            else if (code.startsWith("LEAD_")) {
+                entityType = "LEAD";
+                entityId = Number(code.replace("LEAD_", ""));
+            }
+
+            else if (code.startsWith("COMPANY_")) {
+                entityType = "COMPANY";
+                entityId = Number(code.replace("COMPANY_", ""));
+            }
+
+            else if (code.startsWith("PRODUCT_")) {
+                entityType = "PRODUCT";
+                entityId = Number(code.replace("PRODUCT_", ""));
+            }
+        }
+
+        console.log({
+            entityType,
+            entityId
+        });
+
+        if (!entityType || !entityId) {
+
+            return res.status(400).json({
+                success: false,
+                message: "Entidad no válida"
+            });
+
+        }
+
+        await procesarEntidadBitrix(
+            entityType,
+            entityId
+        );
+
+        return res.json({
+            success: true
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+//////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////
+/*
+export const recibirEventoBitrix = async (req, res) => {
+
+    try {
+
         let event = null;
         let entityId = null;
         let entityType = null;
@@ -100,7 +179,7 @@ export const recibirEventoBitrix = async (req, res) => {
     }
 
 };
-
+*/
 
 
 
@@ -125,9 +204,6 @@ export const recibirEventoBitrix = async (req, res) => {
     });
 };
 */
-
-
-
 
 
 ///////////////////////////////////////////////////

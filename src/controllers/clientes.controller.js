@@ -1,17 +1,96 @@
 // src/controllers/clientes.controller.js
 import validator from "validator";
-
+/*
 import {
     upsertCliente,
     eliminarCliente,
     buscarClientePorId
 } from "../services/mysql.service.js";
-
+*/
+import {
+    upsertCliente,
+    eliminarCliente,
+    buscarClientePorId,
+    upsertDeal,
+    upsertLead,
+    upsertCompany,
+    upsertProducto
+}
+from "../services/mysql.service.js";
+//////////////////////////////
+//////////////////////////////
+/*
 import {
     crearContactoBitrix,
     actualizarContactoBitrix,
     eliminarContactoBitrix
 } from "../services/bitrix.service.js";
+*/
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+import {
+    obtenerContactoBitrix,
+    obtenerDealBitrix,
+    obtenerLeadBitrix,
+    obtenerCompanyBitrix,
+    obtenerProductoBitrix
+}
+from "../services/bitrix.service.js";
+/////////////////////////////////////////
+
+/////////////////////////////////////////
+export const procesarEntidadBitrix =
+async (entityType, entityId) => {
+
+    switch(entityType) {
+
+        case "CONTACT":
+
+            const contacto =
+                await obtenerContactoBitrix(entityId);
+
+            await upsertCliente(contacto);
+
+            break;
+
+        case "DEAL":
+
+            const deal =
+                await obtenerDealBitrix(entityId);
+
+            await upsertDeal(deal);
+
+            break;
+
+        case "LEAD":
+
+            const lead =
+                await obtenerLeadBitrix(entityId);
+
+            await upsertLead(lead);
+
+            break;
+
+        case "COMPANY":
+
+            const company =
+                await obtenerCompanyBitrix(entityId);
+
+            await upsertCompany(company);
+
+            break;
+
+        case "PRODUCT":
+
+            const producto =
+                await obtenerProductoBitrix(entityId);
+
+            await upsertProducto(producto);
+
+            break;
+    }
+};
+//////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////
 // INSERTAR CLIENTE
