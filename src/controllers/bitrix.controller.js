@@ -1,7 +1,8 @@
 import validator from "validator";
 
 import {
-    obtenerContactoBitrix
+    obtenerContactoBitrix,
+    crearContactoBitrix
 } from "../services/bitrix.service.js";
 
 import {

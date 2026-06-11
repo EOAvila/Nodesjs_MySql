@@ -11,7 +11,8 @@ import {
 } from "../services/mysql.service.js";
 
 import {
-    obtenerContactoBitrix
+    obtenerContactoBitrix,
+    crearContactoBitrix
 } from "../services/bitrix.service.js";
 
 /////////////////////////////////////////////////////////////
