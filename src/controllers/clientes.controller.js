@@ -10,6 +10,10 @@ import {
     actualizarCliente
 } from "../services/mysql.service.js";
 
+import {
+    obtenerContactoBitrix
+} from "../services/bitrix.service.js";
+
 /////////////////////////////////////////////////////////////
 // CREAR CLIENTE MYSQL -> BITRIX
 /////////////////////////////////////////////////////////////
