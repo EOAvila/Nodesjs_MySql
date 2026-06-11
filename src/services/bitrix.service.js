@@ -2,15 +2,15 @@
 // bitrix.service.js
 //////////////////////////////////////////////
 import axios from "axios";
+import rateLimit from "express-rate-limit";
 
 import {
     BITRIX_WEBHOOK_IN
 } from "../config/bitrix.js";
 
-import {
-    rateLimitBitrix,
-    sleep
-} from "../utils/rateLimiter.js";
+import 
+    rateLimiter 
+from "../utils/rateLimiter.js";
 
 ///////////////////////////////////////////////////////////
 

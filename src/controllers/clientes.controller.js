@@ -1,11 +1,14 @@
+/////////////////////////////
+// clientes.controller.js
+/////////////////////////////
+import { pool } from "../config/db.js";
+
 import {
     buscarClientePorBitrixId,
     buscarClientePorCorreo,
     upsertCliente,
     actualizarCliente
 } from "../services/mysql.service.js";
-
-import { pool } from "../config/db.js";
 
 /////////////////////////////////////////////////////////////
 // CREAR CLIENTE MYSQL -> BITRIX
