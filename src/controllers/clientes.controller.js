@@ -28,8 +28,15 @@ export const crearCliente = async (req, res) => {
             apellido,
             correo,
             telefono
-        } = req.body;
+        } = req.body || {};
 
+        if (!nombre) {
+            return res.status(400).json({
+                exito: false,
+                mensaje: "El nombre es requerido"
+            });
+        }
+        
         /////////////////////////////////////////////////////
         // CREAR EN BITRIX
         /////////////////////////////////////////////////////
