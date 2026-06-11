@@ -9,6 +9,7 @@ dotenv.config();
 ////////////////////////////////////////////
 
 const PORT = process.env.PORT || 3000;
+
 ///////////////////////////////////////////
 
 const server = app.listen(PORT);
@@ -23,6 +24,19 @@ server.on('error', (error) => {
   process.exit(1);
 });
 
+///////////////////////////////////////////
+// RUTA PARA WEBHOOK CREADA
+//////////////////////////////////////////
+app.post("/webhook/bitrix", (req, res) => {
+    console.log("Webhook recibido");
+    console.log(req.body);
+
+    res.status(200).json({
+        exito: true,
+        mensaje: "Webhook recibido"
+    });
+});
+////////////////////////////////////////////////
 console.log(chalk.green(`
 ✅ ${process.env.APP_NAME || 'Node API'} running
 🌍 Environment : ${process.env.NODE_ENV || 'development'}

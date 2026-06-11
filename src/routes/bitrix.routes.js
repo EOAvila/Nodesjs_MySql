@@ -12,7 +12,7 @@ const router = Router();
 ////////////////////////////////////////////////////////////////
 
 router.post(
-    "/webhook/bitrix",
+    "/bitrix",
     webhookBitrix
 );
 

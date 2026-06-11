@@ -89,7 +89,7 @@ app.get("/", (req, res) => {
 
 app.use("/api", indexRoutes);
 
-app.use("/webhook/bitrix", bitrixRoutes);
+app.use("/webhook", bitrixRoutes);
 
 app.use("/clientes", clientesRoutes);
 
