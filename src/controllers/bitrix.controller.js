@@ -1,8 +1,7 @@
 import validator from "validator";
 
 import {
-    obtenerContactoBitrix,
-    crearContactoBitrix
+    obtenerContactoBitrix
 } from "../services/bitrix.service.js";
 
 import {
@@ -191,7 +190,7 @@ export const webhookBitrix = async (req, res) => {
         }
 
         /////////////////////////////////////////////////////////////
-        // INSERTAR O ACTUALIZAR
+        // INSERTAR O ACTUALIZAR EN MYSQL
         /////////////////////////////////////////////////////////////
 
         if (!existe) {
