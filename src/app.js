@@ -87,11 +87,11 @@ app.get("/", (req, res) => {
 // WEBHOOK RUTAS
 ///////////////////////////////////////////////////////////
 
-app.use("/webhook/", indexRoutes);
+app.use("/api", indexRoutes);
 
 app.use("/webhook/bitrix", bitrixRoutes);
 
-app.use("/webhook/clientes", clientesRoutes);
+app.use("/clientes", clientesRoutes);
 
 ////////////////////////////////////////////////////////////
 // ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
