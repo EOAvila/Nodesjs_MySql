@@ -1,3 +1,6 @@
+////////////////////////////////
+// clientes.routes.js
+////////////////////////////////
 import { Router } from "express";
 
 import {
@@ -7,13 +10,18 @@ import {
 
 const router = Router();
 
+router.get(
+    "/",
+    crearCliente
+);
+
 router.post(
-    "/clientes",
+    "/",
     crearCliente
 );
 
 router.put(
-    "/clientes/:id",
+    "/:id",
     actualizarClienteMysql
 );
 

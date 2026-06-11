@@ -1,3 +1,6 @@
+/////////////////////////////////////////
+// bitrix.routes.js
+////////////////////////////////////////
 import { Router } from "express";
 import axios from "axios";
 
@@ -12,14 +15,14 @@ const router = Router();
 ///////////////////////////////////////////
 // RUTA PARA WEBHOOK CREADA
 //////////////////////////////////////////
-router.get("/webhook/bitrix", (req, res) => {
+router.get("/bitrix", (req, res) => {
     res.status(200).json({
         exito: true,
         mensaje: "Ruta webhook Bitrix activa"
     });
 });
 
-router.post("/webhook/bitrix", (req, res) => {
+router.post("/bitrix", (req, res) => {
     console.log("Webhook recibido");
     console.log(req.body);
 

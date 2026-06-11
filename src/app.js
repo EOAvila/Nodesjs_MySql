@@ -93,20 +93,6 @@ app.use("/webhook", bitrixRoutes);
 
 app.use("/clientes", clientesRoutes);
 
-////////////////////////////////////////////////////////////
-// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
-////////////////////////////////////////////////////////////
-
-app.use((req, res) => {
-
-    return res.status(404).json({
-        success: false,
-        error: "ENDPOINT_NOT_FOUND",
-        message: `La ruta ${req.originalUrl} no existe`
-    });
-
-});
-
 ///////////////////////////////////////////////////////////
 // HEALTH CHECK
 ///////////////////////////////////////////////////////////
@@ -127,6 +113,21 @@ app.get("/webhook/test", (req, res) => {
     res.json({
         success: true,
         message: "Webhook registrado y funcionando correctamente"
+    });
+
+});
+
+
+////////////////////////////////////////////////////////////
+// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
+////////////////////////////////////////////////////////////
+
+app.use((req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        error: "ENDPOINT_NOT_FOUND",
+        message: `La ruta ${req.originalUrl} no existe`
     });
 
 });
