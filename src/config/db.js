@@ -20,9 +20,9 @@ export const pool = createPool({
   database: MYSQLDATABASE,
   port: MYSQLPORT,
 
-  waitForConnections: true,
-  connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10,
-  queueLimit: Number(process.env.MYSQL_QUEUE_LIMIT) || 0,
+   waitForConnections: true,
+    connectionLimit: Number(process.env.MYSQL_CONNECTION_LIMIT) || 10,
+    queueLimit: Number(process.env.MYSQL_QUEUE_LIMIT) || 0,
 
   ssl: {
     rejectUnauthorized: false
@@ -32,35 +32,22 @@ export const pool = createPool({
   keepAliveInitialDelay: 0
 });
 
-
 //////////////////////////////////////////////////////////
 // TEST DE CONEXION
 //////////////////////////////////////////////////////////
-const testConnection = async () => {
 
-    try {
+pool.getConnection()
+    .then(connection => {
 
-        const connection =
-            await pool.getConnection();
+        console.log(chalk.blueBright('MYSQL RAILWAY CONECTADO'))
 
-        console.log(
-            chalk.blueBright(
-                "MYSQL RAILWAY CONECTADO"
-            )
-        );
+        connection.release()
 
-        connection.release();
+    })
+    .catch(error => {
 
-    } catch (error) {
-
-        console.error(
-            chalk.red("ERROR MYSQL:")
-        );
-
-        console.error(error);
-    }
-};
-
-testConnection();
+        console.error('ERROR MYSQL:')
+        console.error(error)
+    })
 
 export default pool;

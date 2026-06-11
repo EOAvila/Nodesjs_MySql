@@ -1,7 +1,7 @@
 import { Router } from "express";
 import axios from "axios";
 import validator from "validator";
-import { pool } from "../../config/db.js";
+import { pool } from "../config/db.js";
 import { BITRIX_WEBHOOK_IN } from "../config.js";
 
 const router = Router();

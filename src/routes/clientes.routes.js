@@ -1,23 +1,20 @@
 import { Router } from "express";
 
-const router = Router();
-
-///////////////////////////////////////////////////////////
-
 import {
-    insertarClienteController,
-    actualizarClienteController,
-    eliminarClienteController
+    crearCliente,
+    actualizarClienteMysql
 } from "../controllers/clientes.controller.js";
 
-///////////////////////////////////////////////////////////
+const router = Router();
 
-router.post("/", insertarClienteController);
+router.post(
+    "/clientes",
+    crearCliente
+);
 
-router.put("/:id", actualizarClienteController);
-
-router.delete("/:id", eliminarClienteController);
-
-///////////////////////////////////////////////////////////
+router.put(
+    "/clientes/:id",
+    actualizarClienteMysql
+);
 
 export default router;

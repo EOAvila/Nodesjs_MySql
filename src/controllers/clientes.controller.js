@@ -1,87 +1,16 @@
-// src/controllers/clientes.controller.js
-import validator from "validator";
-//////////////////////////////////
 import {
-    upsertCliente,
-    eliminarCliente,
-    buscarClientePorId,
-    upsertDeal,
-    upsertLead,
-    upsertCompany,
-    upsertProducto
-}
-from "../services/mysql.service.js";
-//////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////
-import {
-    obtenerContactoBitrix,
-    obtenerDealBitrix,
-    obtenerLeadBitrix,
-    obtenerCompanyBitrix,
-    obtenerProductoBitrix
-}
-from "../services/bitrix.service.js";
-/////////////////////////////////////////
+    buscarClientePorBitrixId,
+    buscarClientePorCorreo,
+    upsertCliente
+} from "../services/mysql.service.js";
 
-/////////////////////////////////////////
-export const procesarEntidadBitrix =
-async (entityType, entityId) => {
+import { pool } from "../config/db.js";
 
-    switch(entityType) {
+/////////////////////////////////////////////////////////////
+// CREAR CLIENTE MYSQL -> BITRIX
+/////////////////////////////////////////////////////////////
 
-        case "CONTACT":
-
-            const contacto =
-                await obtenerContactoBitrix(entityId);
-
-            await upsertCliente(contacto);
-
-            break;
-
-        case "DEAL":
-
-            const deal =
-                await obtenerDealBitrix(entityId);
-
-            await upsertDeal(deal);
-
-            break;
-
-        case "LEAD":
-
-            const lead =
-                await obtenerLeadBitrix(entityId);
-
-            await upsertLead(lead);
-
-            break;
-
-        case "COMPANY":
-
-            const company =
-                await obtenerCompanyBitrix(entityId);
-
-            await upsertCompany(company);
-
-            break;
-
-        case "PRODUCT":
-
-            const producto =
-                await obtenerProductoBitrix(entityId);
-
-            await upsertProducto(producto);
-
-            break;
-    }
-};
-//////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////
-// INSERTAR CLIENTE
-///////////////////////////////////////////////////////////
-
-export const insertarClienteController = async (req, res) => {
+export const crearCliente = async (req, res) => {
 
     try {
 
@@ -92,169 +21,127 @@ export const insertarClienteController = async (req, res) => {
             telefono
         } = req.body;
 
-        ///////////////////////////////////////////////////
-
-        if (!nombre || !apellido) {
-
-            return res.status(400).json({
-                success: false,
-                message: "Nombre y apellido son obligatorios"
-            });
-        }
-
-        ///////////////////////////////////////////////////
-
-        if (
-            correo &&
-            !validator.isEmail(correo)
-        ) {
-
-            return res.status(400).json({
-                success: false,
-                message: "Correo inválido"
-            });
-        }
-
-        ///////////////////////////////////////////////////
+        /////////////////////////////////////////////////////
         // CREAR EN BITRIX
-        ///////////////////////////////////////////////////
-/*
-        const bitrixId =
-            await crearContactoBitrix({
+        /////////////////////////////////////////////////////
 
+        const bitrix_id =
+            await crearContactoBitrix({
                 nombre,
                 apellido,
                 correo,
                 telefono
             });
-*/
-        ///////////////////////////////////////////////////
-        // GUARDAR EN MYSQL
-        ///////////////////////////////////////////////////
 
-        await upsertCliente({
+        /////////////////////////////////////////////////////
+        // INSERTAR MYSQL
+        /////////////////////////////////////////////////////
 
-            bitrix_id: Number(bitrixId),
+        await pool.query(
+            `
+            INSERT INTO pro_clientes
+            (
+                pri_nombre,
+                pri_apellido,
+                correo,
+                telefono,
+                bitrix_id
+            )
+            VALUES (?, ?, ?, ?, ?)
+            `,
+            [
+                nombre,
+                apellido,
+                correo,
+                telefono,
+                bitrix_id
+            ]
+        );
 
-            nombre,
-
-            apellido,
-
-            correo,
-
-            telefono
-        });
-
-        ///////////////////////////////////////////////////
-
-        return res.status(201).json({
-
-            success: true,
-
-            message:
-                "Cliente creado correctamente",
-
-            bitrix_id:
-                bitrixId
+        return res.json({
+            success: true
         });
 
     } catch (error) {
 
-        console.error(
-            "ERROR INSERTAR CLIENTE:",
-            error
-        );
-
         return res.status(500).json({
-
             success: false,
-
-            message:
-                error.message
+            message: error.message
         });
     }
 };
 
-///////////////////////////////////////////////////////////
-// ACTUALIZAR CLIENTE
-///////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////
+// ACTUALIZAR MYSQL -> BITRIX
+/////////////////////////////////////////////////////////////
 
-export const actualizarClienteController =
-async (req, res) => {
+export const actualizarClienteMysql = async (
+    req,
+    res
+) => {
 
     try {
 
         const { id } = req.params;
 
-        ///////////////////////////////////////////////////
-
-        if (
-            !validator.isNumeric(id)
-        ) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    "ID inválido"
-            });
-        }
-
-        ///////////////////////////////////////////////////
-
-        const cliente =
-            await buscarClientePorId(id);
-
-        if (!cliente) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message:
-                    "Cliente no encontrado"
-            });
-        }
-
-        ///////////////////////////////////////////////////
-
         const {
-
             nombre,
-
             apellido,
-
             correo,
-
             telefono
-
         } = req.body;
 
-        ///////////////////////////////////////////////////
+        /////////////////////////////////////////////////////
+        // OBTENER CLIENTE
+        /////////////////////////////////////////////////////
 
-        if (
-            correo &&
-            !validator.isEmail(correo)
-        ) {
+        const [rows] = await pool.query(
+            `
+            SELECT * FROM pro_clientes
+            WHERE id = ?
+            `,
+            [id]
+        );
 
-            return res.status(400).json({
+        if (!rows.length) {
 
+            return res.status(404).json({
                 success: false,
-
-                message:
-                    "Correo inválido"
+                message: "Cliente no encontrado"
             });
         }
 
-        ///////////////////////////////////////////////////
+        const cliente = rows[0];
+
+        /////////////////////////////////////////////////////
+        // ACTUALIZAR MYSQL
+        /////////////////////////////////////////////////////
+
+        await pool.query(
+            `
+            UPDATE pro_clientes
+            SET
+                pri_nombre = ?,
+                pri_apellido = ?,
+                correo = ?,
+                telefono = ?
+            WHERE id = ?
+            `,
+            [
+                nombre,
+                apellido,
+                correo,
+                telefono,
+                id
+            ]
+        );
+
+        /////////////////////////////////////////////////////
         // ACTUALIZAR BITRIX
-        ///////////////////////////////////////////////////
+        /////////////////////////////////////////////////////
 
         await actualizarContactoBitrix(
-
             cliente.bitrix_id,
-
             {
                 nombre,
                 apellido,
@@ -263,138 +150,15 @@ async (req, res) => {
             }
         );
 
-        ///////////////////////////////////////////////////
-        // UPSERT MYSQL
-        ///////////////////////////////////////////////////
-
-        await upsertCliente({
-
-            bitrix_id:
-                cliente.bitrix_id,
-
-            nombre:
-                nombre ??
-                cliente.pri_nombre,
-
-            apellido:
-                apellido ??
-                cliente.pri_apellido,
-
-            correo:
-                correo ??
-                cliente.correo,
-
-            telefono:
-                telefono ??
-                cliente.telefono
-        });
-
-        ///////////////////////////////////////////////////
-
-        return res.status(200).json({
-
-            success: true,
-
-            message:
-                "Cliente actualizado correctamente"
+        return res.json({
+            success: true
         });
 
     } catch (error) {
 
-        console.error(
-            "ERROR ACTUALIZAR CLIENTE:",
-            error
-        );
-
         return res.status(500).json({
-
             success: false,
-
-            message:
-                error.message
-        });
-    }
-};
-
-///////////////////////////////////////////////////////////
-// ELIMINAR CLIENTE
-///////////////////////////////////////////////////////////
-
-export const eliminarClienteController =
-async (req, res) => {
-
-    try {
-
-        const { id } = req.params;
-
-        ///////////////////////////////////////////////////
-
-        if (
-            !validator.isNumeric(id)
-        ) {
-
-            return res.status(400).json({
-
-                success: false,
-
-                message:
-                    "ID inválido"
-            });
-        }
-
-        ///////////////////////////////////////////////////
-
-        const cliente =
-            await buscarClientePorId(id);
-
-        if (!cliente) {
-
-            return res.status(404).json({
-
-                success: false,
-
-                message:
-                    "Cliente no encontrado"
-            });
-        }
-
-        ///////////////////////////////////////////////////
-        // ELIMINAR BITRIX
-        ///////////////////////////////////////////////////
-
-        await eliminarContactoBitrix(
-            cliente.bitrix_id
-        );
-
-        ///////////////////////////////////////////////////
-        // ELIMINAR MYSQL
-        ///////////////////////////////////////////////////
-
-        await eliminarCliente(id);
-
-        ///////////////////////////////////////////////////
-
-        return res.status(200).json({
-
-            success: true,
-
-            message:
-                "Cliente eliminado correctamente"
-        });
-
-    } catch (error) {
-
-        console.error(
-            "ERROR ELIMINAR CLIENTE:",
-            error
-        );
-
-        return res.status(500).json({
-
-            success: false,
-
-            message:
-                error.message
+            message: error.message
         });
     }
 };

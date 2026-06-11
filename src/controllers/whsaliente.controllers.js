@@ -1,6 +1,6 @@
 import { Router } from "express";
 import axios from 'axios'
-import { pool } from '../../config/db.js'
+import { pool } from '../config/db.js'
 import { BITRIX_WEBHOOK_OUT } from "../config.js";
 
 //////////////////////////////////

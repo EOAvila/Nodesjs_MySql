@@ -1,9 +1,14 @@
-export const errorHandler = (err, req, res, next) => {
-    console.error(err.stack)
+export const errorHandler = (
+    err,
+    req,
+    res,
+    next
+) => {
 
-    res.status(500).json({ 
-        success: false, 
-        message: 'Error interno del servidor', 
-        error: err.message
-    })
-}
+    console.error(err);
+
+    return res.status(500).json({
+        success: false,
+        message: err.message
+    });
+};

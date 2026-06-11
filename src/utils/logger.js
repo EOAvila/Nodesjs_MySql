@@ -1,3 +1,6 @@
+////////////////////////////////////////////////////
+// logger.js
+///////////////////////////////////////////////////
 const logger = {
 
     info: (...args) => {
@@ -12,5 +15,11 @@ const logger = {
         console.error('[ERROR]', ...args);
     }
 };
+//////////////////////////////////////////////////
+export const logger = (message) => (
+    console.log(
+        `{${new Date(), toISOString()}] ${message}`
+    )
+)
 
 export default logger;

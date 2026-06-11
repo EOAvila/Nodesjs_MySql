@@ -1,70 +1,36 @@
 import app from './app.js';
 import { pool } from './config/db.js';
-//import dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import chalk from 'chalk';
-import {
-    iniciarWorker
-} from './jobs/sync.worker.js';
 ////////////////////////////////////////////
 
-//dotenv.config();
+dotenv.config();
+
 ////////////////////////////////////////////
 
 const PORT = process.env.PORT || 3000;
 ///////////////////////////////////////////
 
-//const server = app.listen(PORT);
-//server.keepAliveTimeout = 65000;
+const server = app.listen(PORT);
+server.keepAliveTimeout = 65000;
 
-//server.on('listening', () => {
-//  console.log(chalk.green(`Server is running on port ${PORT}`));
-//});
+server.on('listening', () => {
+  console.log(chalk.green(`Server is running on port ${PORT}`));
+});
 
-//server.on('error', (error) => {
-//  console.error(chalk.red('Error starting server:'), error);
-//  process.exit(1);
-//});
+server.on('error', (error) => {
+  console.error(chalk.red('Error starting server:'), error);
+  process.exit(1);
+});
 
+console.log(chalk.green(`
+✅ ${process.env.APP_NAME || 'Node API'} running
+🌍 Environment : ${process.env.NODE_ENV || 'development'}
+🚪 Port        : ${PORT}
+🔗 Local URL   : http://localhost:${PORT}
+⏰ Time        : ${new Date().toLocaleString()}
+`));
 
-///////////////////////////////////////////////////////////
-
-const startServer = async () => {
-
-    try {
-
-        const connection =
-            await pool.getConnection();
-
-        console.log(chalk.yellowBright(
-            "MYSQL CONNECTED IN RAILWAY")
-        );
-
-        connection.release();
-
-        ///////////////////////////////////////////////////
-
-        app.listen(PORT, () => {
-
-            console.log(chalk.green(
-                `SERVER IS RUNNING IN PORT: ${PORT}`)
-            );
-
-             ///////////////////////////////////////////////////
-
-            iniciarWorker();
-        });
-
-
-
-    } catch (error) {
-
-        console.error(
-            "MYSQL ERROR",
-            error.message
-        );
-    }
-};
-
-///////////////////////////////////////////////////////////
-
-startServer();
+console.log(chalk.yellowBright(
+  "MYSQL CONNECTED IN RAILWAY")
+);

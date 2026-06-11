@@ -1,3 +1,6 @@
+//////////////////////////////////////////////
+// bitrix.service.js
+//////////////////////////////////////////////
 import axios from "axios";
 
 import {
@@ -24,352 +27,113 @@ const bitrixApi = axios.create({
     }
 });
 
-///////////////////////////////////////////////////////////
-export const bitrixRequest =
-async (
-    method,
-    data = {}
+/////////////////////////////////////////////////////////////
+// OBTENER CONTACTO BITRIX
+/////////////////////////////////////////////////////////////
+export const obtenerContactoBitrix = async (
+    id
 ) => {
 
-    let retries = 0;
+    try {
 
-    while (retries < 5) {
-
-        try {
-
-            await rateLimitBitrix();
-
-            const response =
-                await bitrixApi.post(
-                    `${method}.json`,
-                    data
-                );
-
-            const responseData =
-                response.data;
-
-            console.log(
-                    "METHOD:",
-                        method
-            );
-
-            console.log(
-                    "DATA:",
-                        JSON.stringify(data)
-            );
-
-
-            if (
-                responseData.error
-            ) {
-
-                throw {
-                    response: {
-                        data:
-                            responseData
-                    }
-                };
+        const response = await axios.get(
+            `${bitrixApi}crm.contact.get.json?id=${id}`,
+            {
+                timeout: 10000
             }
+        );
 
-            return responseData.result;
+        ///////////////////////////////////////////////////////
+        // VALIDAR ERROR BITRIX
+        ///////////////////////////////////////////////////////
 
-        } catch (error) {
-
-            console.log(
-                "BITRIX RESPONSE:",
-                JSON.stringify(
-                    error.response?.data,
-                    null,
-                    2
-                )
-            );
+        if (response.data.error) {
 
             throw new Error(
-
-                error.response?.data
-                    ?.error_description
-
-                ||
-
-                error.message
-
-                ||
-
+                response.data.error_description ||
                 "Error Bitrix24"
             );
         }
 
-        /*catch (error) {
+        ///////////////////////////////////////////////////////
+        // RETORNAR RESULT
+        ///////////////////////////////////////////////////////
 
-            const bitrixError =
-                error.response?.data?.error;
+        return response.data.result;
 
-            ///////////////////////////////////////////////////
-            // RATE LIMIT
-            ///////////////////////////////////////////////////
+    } catch (error) {
 
-            if (
+        console.error(
+            "ERROR BITRIX SERVICE:",
+            error.message
+        );
 
-                bitrixError ===
-                    "QUERY_LIMIT_EXCEEDED"
-
-                ||
-
-                bitrixError ===
-                    "TOO_MANY_REQUESTS"
-            ) {
-
-                const waitTime =
-
-                    Math.pow(
-                        2,
-                        retries
-                    ) * 5000;
-
-                console.log(
-                    `BITRIX LIMIT: esperando ${waitTime} ms`
-                );
-
-                await sleep(
-                    waitTime
-                );
-
-                retries++;
-
-                continue;
-            }
-
-            ///////////////////////////////////////////////////
-
-            throw new Error(
-
-                error.response?.data
-                    ?.error_description
-
-                ||
-
-                error.message
-
-                ||
-
-                "Error Bitrix24"
-            );
-        }*/
- /*   }
-
-    throw new Error(
-        "Número máximo de reintentos alcanzado"
-    );*/
-    
+        throw new Error(
+            "No se pudo obtener contacto Bitrix24"
+        );
     }
 };
 
+/////////////////////////////////////////////////////////////
+// CREAR CONTACTO
+/////////////////////////////////////////////////////////////
 
-///////////////////////////////////////////////////////////
-// CONTACT GET
-///////////////////////////////////////////////////////////
-//export const obtenerContactoBitrix = async (id) => {
+export const crearContactoBitrix = async (cliente) => {
 
-//    const response = await axios.get(
-//        `${WEBHOOK}/crm.contact.get.json`,
-//        {
-//            params: { id }
-//        }
-//    );
-
-//    return response.data.result;
-//};
-
-////////////////////////////////////////////////////////////////////
-export const obtenerContactoBitrix =
-async (id) => {
-    try {   
-        
-        console.log("ID RECIBIDO:", id);
-        console.log("URL BITRIX:", BITRIX_WEBHOOK_IN);
-
-        console.log(
-            "ENTITY ID:",
-                id,
-            "TYPE:",
-                typeof id
-            );
-
-        return await bitrixRequest(
-                "crm.contact.get",
-                {
-                    id:
-                        Number(id)
-                }
-            );
-        } catch (error) {
-            console.error("BITRIX ERROR:");
-            console.error(error.response?.data);
-
-            throw error;
-            }
-};
-
-///////////////////////////////////////////////////////////
-// CONTACT ADD
-///////////////////////////////////////////////////////////
-export const crearContactoBitrix =
-async ({
-    nombre,
-    apellido,
-    correo,
-    telefono
-}) => {
-
-    return await bitrixRequest(
-        "crm.contact.add",
+    const response = await axios.post(
+        `${bitrixApi}crm.contact.add.json`,
         {
             fields: {
-
-                NAME:
-                    nombre,
-
-                LAST_NAME:
-                    apellido,
-
-                EMAIL:
-                    correo
-                        ? [{
-                            VALUE:
-                                correo,
-                            VALUE_TYPE:
-                                "WORK"
-                        }]
-                        : [],
-
-                PHONE:
-                    telefono
-                        ? [{
-                            VALUE:
-                                telefono,
-                            VALUE_TYPE:
-                                "WORK"
-                        }]
-                        : []
+                NAME: cliente.nombre,
+                LAST_NAME: cliente.apellido,
+                PHONE: [
+                    {
+                        VALUE: cliente.telefono,
+                        VALUE_TYPE: "WORK"
+                    }
+                ],
+                EMAIL: [
+                    {
+                        VALUE: cliente.correo,
+                        VALUE_TYPE: "WORK"
+                    }
+                ]
             }
         }
     );
+
+    return response.data.result;
 };
 
-///////////////////////////////////////////////////////////
-// CONTACT UPDATE
-///////////////////////////////////////////////////////////
-export const actualizarContactoBitrix =
-async (
-    id,
-    datos
+/////////////////////////////////////////////////////////////
+// ACTUALIZAR CONTACTO
+/////////////////////////////////////////////////////////////
+
+export const actualizarContactoBitrix = async (
+    bitrix_id,
+    cliente
 ) => {
 
-    return await bitrixRequest(
-        "crm.contact.update",
+    await axios.post(
+        `${bitrixApi}crm.contact.update.json`,
         {
-
-            id:
-                Number(id),
-
+            id: bitrix_id,
             fields: {
-
-                NAME:
-                    datos.nombre,
-
-                LAST_NAME:
-                    datos.apellido,
-
-                EMAIL:
-                    datos.correo
-                        ? [{
-                            VALUE:
-                                datos.correo,
-                            VALUE_TYPE:
-                                "WORK"
-                        }]
-                        : [],
-
-                PHONE:
-                    datos.telefono
-                        ? [{
-                            VALUE:
-                                datos.telefono,
-                            VALUE_TYPE:
-                                "WORK"
-                        }]
-                        : []
+                NAME: cliente.nombre,
+                LAST_NAME: cliente.apellido,
+                PHONE: [
+                    {
+                        VALUE: cliente.telefono,
+                        VALUE_TYPE: "WORK"
+                    }
+                ],
+                EMAIL: [
+                    {
+                        VALUE: cliente.correo,
+                        VALUE_TYPE: "WORK"
+                    }
+                ]
             }
-        }
-    );
-};
-
-///////////////////////////////////////////////////////////
-// CONTACT DELETE
-///////////////////////////////////////////////////////////
-export const eliminarContactoBitrix =
-async (id) => {
-
-    return await bitrixRequest(
-        "crm.contact.delete",
-        {
-            id:
-                Number(id)
-        }
-    );
-};
-
-//////////////////////////////////////////////////////////
-// OBTENER LEAD
-///////////////////////////////////////////////////////////
-export const obtenerLeadBitrix =
-async (id) => {
-
-    return await bitrixRequest(
-        "crm.lead.get",
-        {
-            id: Number(id)
-        }
-    );
-};
-
-//////////////////////////////////////////////////////////
-// OBTENER DEAL
-///////////////////////////////////////////////////////////
-export const obtenerDealBitrix =
-async (id) => {
-
-    return await bitrixRequest(
-        "crm.deal.get",
-        {
-            id: Number(id)
-        }
-    );
-};
-//////////////////////////////////////////////////////////
-// OBTENER COMPANY
-///////////////////////////////////////////////////////////
-export const obtenerCompanyBitrix =
-async (id) => {
-
-    return await bitrixRequest(
-        "crm.company.get",
-        {
-            id: Number(id)
-        }
-    );
-};
-
-//////////////////////////////////////////////////////////
-// OBTENER PRODUCTO
-///////////////////////////////////////////////////////////
-export const obtenerProductoBitrix =
-async (id) => {
-
-    return await bitrixRequest(
-        "crm.product.get",
-        {
-            id: Number(id)
         }
     );
 };
