@@ -1,7 +1,8 @@
 import {
     buscarClientePorBitrixId,
     buscarClientePorCorreo,
-    upsertCliente
+    upsertCliente,
+    actualizarCliente
 } from "../services/mysql.service.js";
 
 import { pool } from "../config/db.js";

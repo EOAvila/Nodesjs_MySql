@@ -7,7 +7,8 @@ import {
 import {
     buscarClientePorBitrixId,
     buscarClientePorCorreo,
-    upsertCliente
+    upsertCliente,
+    actualizarCliente
 } from "../services/mysql.service.js";
 
 /////////////////////////////////////////////////////////////
@@ -203,7 +204,7 @@ export const webhookBitrix = async (req, res) => {
 
         } else {
 
-            await upsertCliente(
+            await actualizarCliente(
                 cliente.bitrix_id,
                 cliente
             );
