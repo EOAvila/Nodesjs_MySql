@@ -77,7 +77,7 @@ export const webhookBitrix = async (req, res) => {
         // VALIDAR DATA
         /////////////////////////////////////////////////////////////
 
-        if (
+/*       if (
             !data ||
             !data.FIELDS ||
             !data.FIELDS.ID
@@ -88,14 +88,26 @@ export const webhookBitrix = async (req, res) => {
                 message: "ID de contacto no recibido"
             });
         }
-
+*/
         /////////////////////////////////////////////////////////////
         // ID CONTACTO
         /////////////////////////////////////////////////////////////
 
-        const contactId = String(
-            data.FIELDS.ID
-        ).trim();
+        const contactId =
+            data?.ID ||
+            data?.FIELDS?.ID ||
+            data?.FIELDS?.ID?.toString();
+
+        if (!contactId) {
+            return res.status(400).json({
+                success: false,
+                message: "ID de contacto no recibido"
+            });
+        }
+
+     //   const contactId = String(
+     //       data.FIELDS.ID
+     //   ).trim();
 
         /////////////////////////////////////////////////////////////
         // VALIDAR ID
@@ -116,9 +128,23 @@ export const webhookBitrix = async (req, res) => {
         const contacto =
             await obtenerContactoBitrix(contactId);
 
+        res.status(200).json({
+            success: true,
+            message: "Webhook recibido"
+        });
+
+        setImmediate(async () => {
+            try {
+                await procesarWebhookBitrix(req.body);
+            } catch (e) {
+                console.error("ERROR PROCESANDO WEBHOOK:", e);
+            }
+        });
+
         /////////////////////////////////////////////////////////////
         // VALIDAR CONTACTO
         /////////////////////////////////////////////////////////////
+        console.log("BITRIX RESPONSE:", response.data);
 
         if (!contacto || typeof contacto !== "object") {
 
@@ -185,13 +211,13 @@ export const webhookBitrix = async (req, res) => {
         // BUSCAR POR CORREO
         /////////////////////////////////////////////////////////////
 
-        if (!existe && cliente.correo) {
+        /*if (!existe && cliente.correo) {
 
             existe =
                 await buscarClientePorCorreo(
                     cliente.correo
                 );
-        }
+        }*/
 
         /////////////////////////////////////////////////////////////
         // INSERTAR O ACTUALIZAR EN MYSQL
@@ -230,25 +256,44 @@ export const webhookBitrix = async (req, res) => {
         });
 
     } catch (error) {
-
-        /////////////////////////////////////////////////////////////
-        // LOG ERROR
-        /////////////////////////////////////////////////////////////
-
-        console.error(
-            "ERROR WEBHOOK BITRIX:",
-            error
-        );
-
-        /////////////////////////////////////////////////////////////
-        // RESPUESTA ERROR
-        /////////////////////////////////////////////////////////////
-
-        return res.status(500).json({
-            success: false,
-            message:
-                "Error interno del servidor",
-            error: error.message
+        console.error("BITRIX ERROR FULL:", {
+            message: error.message,
+            response: error.response?.data,
+            status: error.response?.status
         });
+
+        throw new Error("No se pudo obtener contacto Bitrix24");
     }
 };
+//////////////////////////////////////////////////////////////////
+const procesarWebhookBitrix = async (body) => {
+
+    const { event, data } = body;
+
+    const contactId =
+        data?.ID ||
+        data?.FIELDS?.ID;
+
+    if (!contactId) return;
+
+    const contacto = await obtenerContactoBitrix(contactId);
+
+    const cliente = {
+        nombre: contacto.NAME || "",
+        apellido: contacto.LAST_NAME || "",
+        correo: contacto.EMAIL?.[0]?.VALUE || "",
+        telefono: contacto.PHONE?.[0]?.VALUE || "",
+        bitrix_id: Number(contacto.ID)
+    };
+
+    const existe = await buscarClientePorBitrixId(cliente.bitrix_id);
+
+    if (!existe) {
+        await upsertCliente(cliente);
+        console.log("INSERTADO:", cliente.bitrix_id);
+    } else {
+        await actualizarCliente(cliente.bitrix_id, cliente);
+        console.log("ACTUALIZADO:", cliente.bitrix_id);
+    }
+};
+

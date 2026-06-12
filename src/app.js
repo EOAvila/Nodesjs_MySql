@@ -97,19 +97,6 @@ app.get("/", (req, res) => {
 
 });
 
-////////////////////////////////////////////////////////////
-// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
-////////////////////////////////////////////////////////////
-app.use((req, res) => {
-
-    return res.status(404).json({
-        success: false,
-        error: "ENDPOINT_NOT_FOUND",
-        message: `La ruta ${req.originalUrl} no existe`
-    });
-
-});
-
 ////////////////////////////////////
 // VALIDA CRYPTO
 ///////////////////////////////////
@@ -215,6 +202,19 @@ app.use((error, req, res, next) => {
     }
 
     next(error);
+
+});
+
+////////////////////////////////////////////////////////////
+// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
+////////////////////////////////////////////////////////////
+app.use((req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        error: "ENDPOINT_NOT_FOUND",
+        message: `La ruta ${req.originalUrl} no existe`
+    });
 
 });
 

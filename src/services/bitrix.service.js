@@ -6,7 +6,7 @@ import rateLimit from "express-rate-limit";
 
 import {
     BITRIX_WEBHOOK_IN
-} from "../config/bitrix.js";
+} from "../config.js";
 
 import 
     rateLimiter 

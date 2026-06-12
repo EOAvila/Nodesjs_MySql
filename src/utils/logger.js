@@ -2,24 +2,14 @@
 // logger.js
 ///////////////////////////////////////////////////
 const logger = {
+    info: (msg) =>
+        console.log(`[INFO ${new Date().toISOString()}] ${msg}`),
 
-    info: (...args) => {
-        console.log('[INFO]', ...args);
-    },
+    warn: (msg) =>
+        console.warn(`[WARN ${new Date().toISOString()}] ${msg}`),
 
-    warn: (...args) => {
-        console.warn('[WARN]', ...args);
-    },
-
-    error: (...args) => {
-        console.error('[ERROR]', ...args);
-    }
+    error: (msg) =>
+        console.error(`[ERROR ${new Date().toISOString()}] ${msg}`)
 };
-//////////////////////////////////////////////////
-export const logger = (message) => (
-    console.log(
-        `{${new Date(), toISOString()}] ${message}`
-    )
-)
 
 export default logger;
