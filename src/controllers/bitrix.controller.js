@@ -1,3 +1,6 @@
+//////////////////////////////////////////////////
+// bitrix.controller.js
+//////////////////////////////////////////////////
 import validator from "validator";
 
 import {
@@ -58,7 +61,8 @@ export const webhookBitrix = async (req, res) => {
 
         const eventosPermitidos = [
             "ONCRMCONTACTADD",
-            "ONCRMCONTACTUPDATE"
+            "ONCRMCONTACTUPDATE",
+            "ONCRMCONTACTDELETE"
         ];
 
         if (!eventosPermitidos.includes(event)) {

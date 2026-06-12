@@ -222,22 +222,24 @@ export const actualizarCliente = async (
     cliente
 ) => {
 
-    await pool.query(
-        `
-        UPDATE pro_clientes
-        SET
-            pri_nombre = ?,
-            pri_apellido = ?,
-            correo = ?,
-            telefono = ?
-        WHERE bitrix_id = ?
-        `,
-        [
-            cliente.nombre,
-            cliente.apellido,
-            cliente.correo,
-            cliente.telefono,
-            bitrix_id
-        ]
+    const [result] = await pool.query(
+            `
+            UPDATE pro_clientes
+            SET
+                pri_nombre = ?,
+                pri_apellido = ?,
+                correo = ?,
+                telefono = ?
+            WHERE bitrix_id = ?
+            `,
+            [
+                cliente.nombre,
+                cliente.apellido,
+                cliente.correo,
+                cliente.telefono,
+                bitrix_id
+            ]
     );
+    
+    return result;
 };

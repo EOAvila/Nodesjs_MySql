@@ -53,8 +53,14 @@ export const crearCliente = async (req, res) => {
         /////////////////////////////////////////////////////
         // INSERTAR MYSQL
         /////////////////////////////////////////////////////
-
-        await pool.query(
+        await upsertCliente({
+            bitrix_id,
+            nombre,
+            apellido,
+            correo,
+            telefono
+        });
+        /*await pool.query(
             `
             INSERT INTO pro_clientes
             (
@@ -73,7 +79,7 @@ export const crearCliente = async (req, res) => {
                 telefono,
                 bitrix_id
             ]
-        );
+        );*/
 
         return res.json({
             success: true

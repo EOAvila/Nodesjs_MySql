@@ -42,9 +42,13 @@ export const obtenerContactoBitrix = async (
                 timeout: 10000
             }
         );*/
-        
         const response = await bitrixApi.get(
-            `crm.contact.get.json?id=${id}`
+            "crm.contact.get.json",
+            {
+                params: {
+                    id
+                }
+            }
         );
 
         ///////////////////////////////////////////////////////
