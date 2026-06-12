@@ -1,3 +1,6 @@
+//////////////////////////////////////
+// server.js
+//////////////////////////////////////
 import app from './app.js';
 import { pool } from './config/db.js';
 import dotenv from 'dotenv';

@@ -36,11 +36,15 @@ export const obtenerContactoBitrix = async (
 
     try {
 
-        const response = await axios.get(
+        /*const response = await axios.get(
             `${bitrixApi}crm.contact.get.json?id=${id}`,
             {
                 timeout: 10000
             }
+        );*/
+        
+        const response = await bitrixApi.get(
+            `crm.contact.get.json?id=${id}`
         );
 
         ///////////////////////////////////////////////////////

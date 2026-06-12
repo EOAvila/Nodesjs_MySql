@@ -1,3 +1,6 @@
+//////////////////////////////////
+// error.middleware.js
+///////////////////////////////////
 export const errorHandler = (
     err,
     req,
@@ -12,3 +15,4 @@ export const errorHandler = (
         message: err.message
     });
 };
+

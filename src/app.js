@@ -5,7 +5,7 @@ import express from "express";
 import cors from "cors";
 import morgan from "morgan";
 import helmet from "helmet";
-
+import crypto from "crypto";
 ///////////////////////////////////////////////////////////
 
 import indexRoutes from "./routes/index.routes.js";
@@ -27,7 +27,7 @@ const app = express();
 app.use(
     cors({
         origin: "*",
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         allowedHeaders: ["Content-Type", "Authorization"]
     })
 );
@@ -36,8 +36,11 @@ app.use(
 // MIDDLEWARES
 ///////////////////////////////////////////////////////////
 
-app.use(helmet());
-
+app.use(
+    helmet({
+        crossOriginResourcePolicy: false
+    })
+);
 ///////////////////////////////////////////////////////////
 // BODY PARSER
 ///////////////////////////////////////////////////////////
@@ -69,6 +72,27 @@ app.use(
 
 app.disable("x-powered-by");
 
+//////////////////////////
+// PRUEBA PROXY
+//////////////////////////
+app.set("trust proxy", 1);
+
+
+////////////////////////////////////////////////////////////
+// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
+////////////////////////////////////////////////////////////
+
+app.use((req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        error: "ENDPOINT_NOT_FOUND",
+        message: `La ruta ${req.originalUrl} no existe`
+    });
+
+});
+
+
 ////////////////////////////////////////////////////////////
 // RUTA PRINCIPAL
 ////////////////////////////////////////////////////////////
@@ -97,7 +121,7 @@ app.use("/clientes", clientesRoutes);
 // HEALTH CHECK
 ///////////////////////////////////////////////////////////
 
-app.get("/api/health", (req, res) => {
+/*app.get("/api/health", (req, res) => {
 
     res.status(200).json({
         success: true,
@@ -116,38 +140,91 @@ app.get("/webhook/test", (req, res) => {
     });
 
 });
-
-
-////////////////////////////////////////////////////////////
-// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
-////////////////////////////////////////////////////////////
-
-app.use((req, res) => {
-
-    return res.status(404).json({
-        success: false,
-        error: "ENDPOINT_NOT_FOUND",
-        message: `La ruta ${req.originalUrl} no existe`
-    });
-
-});
+*/
 
 ////////////////////////////////////////////////////////////
 // MANEJO GLOBAL DE ERRORES
 ////////////////////////////////////////////////////////////
+/*app.use((error, req, res, next) => {
 
-app.use((error, req, res, next) => {
-
-    console.error("❌ ERROR GLOBAL:", error);
+    console.error(error);
 
     return res.status(error.status || 500).json({
         success: false,
-        error: error.code || "INTERNAL_SERVER_ERROR",
+        error:
+            error.code ||
+            error.name ||
+            "INTERNAL_SERVER_ERROR",
         message:
             process.env.NODE_ENV === "production"
                 ? "Error interno del servidor"
-                : error.message
+                : error.message,
+        stack:
+            process.env.NODE_ENV !== "production"
+                ? error.stack
+                : undefined
     });
+
+});
+*/
+app.use((error, req, res, next) => {
+
+    console.error(
+        "================================="
+    );
+
+    console.error("ERROR GLOBAL");
+
+    console.error(
+        error.stack || error
+    );
+
+    console.error(
+        "================================="
+    );
+
+    return res.status(
+        error.status || 500
+    ).json({
+        success: false,
+        message: error.message
+    });
+
+});
+
+
+
+
+//////////////////////////////////////////////////////////
+// CAPTURA DE ERROR JSON
+//////////////////////////////////////////////////////////
+app.use((error, req, res, next) => {
+
+    if (error instanceof SyntaxError) {
+
+        return res.status(400).json({
+            success: false,
+            message: "JSON inválido"
+        });
+
+    }
+
+    next(error);
+
+});
+
+////////////////////////////////////
+// VALIDA CRYPTO
+///////////////////////////////////
+app.use((req, res, next) => {
+
+    req.requestId = crypto.randomUUID();
+
+    console.log(
+        `[${req.requestId}] ${req.method} ${req.originalUrl}`
+    );
+
+    next();
 
 });
 

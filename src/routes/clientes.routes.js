@@ -8,21 +8,27 @@ import {
     actualizarClienteMysql
 } from "../controllers/clientes.controller.js";
 
+//////////////////////////////////////
 const router = Router();
+//////////////////////////////////////
 
-router.get(
-    "/",
-    crearCliente
-);
+//router.get("/", listarClientes);
 
-router.post(
-    "/",
-    crearCliente
-);
+router.post("/", crearCliente);
 
-router.put(
-    "/:id",
-    actualizarClienteMysql
-);
+router.put("/:id", actualizarClienteMysql);
+
+//router.delete("/:id", eliminarClienteController);
+
+//////////////////////////////////////////////////
+//
+//////////////////////////////////////////////////
+router.get("/", (req, res) => {
+    res.json({
+        success: true,
+        message: "Endpoint clientes activo"
+    });
+});
+router.post("/", crearCliente);
 
 export default router;

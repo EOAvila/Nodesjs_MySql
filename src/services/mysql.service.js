@@ -1,3 +1,6 @@
+////////////////////////////////////////////
+// mysql.service.js
+/////////////////////////////////////////////
 import validator from "validator";
 import { pool } from "../config/db.js";
 
@@ -119,10 +122,10 @@ async ({
         ON DUPLICATE KEY UPDATE
 
         pri_nombre =
-            VALUES(nombre),
+            VALUES(pri_nombre),
 
         pri_apellido =
-            VALUES(apellido),
+            VALUES(pri_apellido),
 
         correo =
             VALUES(correo),

@@ -12,7 +12,8 @@ import {
 
 import {
     obtenerContactoBitrix,
-    crearContactoBitrix
+    crearContactoBitrix,
+    actualizarContactoBitrix
 } from "../services/bitrix.service.js";
 
 /////////////////////////////////////////////////////////////
@@ -114,7 +115,7 @@ export const actualizarClienteMysql = async (
         const [rows] = await pool.query(
             `
             SELECT * FROM pro_clientes
-            WHERE id = ?
+            WHERE id_pro_clientes = ?
             `,
             [id]
         );
@@ -141,7 +142,7 @@ export const actualizarClienteMysql = async (
                 pri_apellido = ?,
                 correo = ?,
                 telefono = ?
-            WHERE id = ?
+            WHERE id_pro_clientes = ?
             `,
             [
                 nombre,
