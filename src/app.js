@@ -35,16 +35,15 @@ app.use(
 ///////////////////////////////////////////////////////////
 // MIDDLEWARES
 ///////////////////////////////////////////////////////////
-
 app.use(
     helmet({
         crossOriginResourcePolicy: false
     })
 );
+
 ///////////////////////////////////////////////////////////
 // BODY PARSER
 ///////////////////////////////////////////////////////////
-
 app.use(
     express.json({
         limit: "10mb"
@@ -61,7 +60,6 @@ app.use(
 ////////////////////////////////////////////////////////////
 // LOGGER HTTP
 ////////////////////////////////////////////////////////////
-
 app.use(
     morgan("dev")
 );
@@ -69,43 +67,12 @@ app.use(
 ////////////////////////////////////////////////////////////
 // CONFIGURACIÓN GLOBAL
 ////////////////////////////////////////////////////////////
-
 app.disable("x-powered-by");
 
 //////////////////////////
 // PRUEBA PROXY
 //////////////////////////
 app.set("trust proxy", 1);
-
-
-////////////////////////////////////////////////////////////
-// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
-////////////////////////////////////////////////////////////
-
-app.use((req, res) => {
-
-    return res.status(404).json({
-        success: false,
-        error: "ENDPOINT_NOT_FOUND",
-        message: `La ruta ${req.originalUrl} no existe`
-    });
-
-});
-
-
-////////////////////////////////////////////////////////////
-// RUTA PRINCIPAL
-////////////////////////////////////////////////////////////
-
-app.get("/", (req, res) => {
-
-    return res.status(200).json({
-        success: true,
-        message: "🚀 API REST funcionando correctamente",
-        timestamp: new Date().toISOString()
-    });
-
-});
 
 ///////////////////////////////////////////////////////////
 // WEBHOOK RUTAS
@@ -116,6 +83,47 @@ app.use("/api", indexRoutes);
 app.use("/webhook", bitrixRoutes);
 
 app.use("/clientes", clientesRoutes);
+
+////////////////////////////////////////////////////////////
+// RUTA PRINCIPAL
+////////////////////////////////////////////////////////////
+app.get("/", (req, res) => {
+
+    return res.status(200).json({
+        success: true,
+        message: "🚀 API REST funcionando correctamente",
+        timestamp: new Date().toISOString()
+    });
+
+});
+
+////////////////////////////////////////////////////////////
+// ERROR 404 - MANEJO DE RUTAS NO ENCONTRADAS
+////////////////////////////////////////////////////////////
+app.use((req, res) => {
+
+    return res.status(404).json({
+        success: false,
+        error: "ENDPOINT_NOT_FOUND",
+        message: `La ruta ${req.originalUrl} no existe`
+    });
+
+});
+
+////////////////////////////////////
+// VALIDA CRYPTO
+///////////////////////////////////
+app.use((req, res, next) => {
+
+    req.requestId = crypto.randomUUID();
+
+    console.log(
+        `[${req.requestId}] ${req.method} ${req.originalUrl}`
+    );
+
+    next();
+
+});
 
 ///////////////////////////////////////////////////////////
 // HEALTH CHECK
@@ -192,9 +200,6 @@ app.use((error, req, res, next) => {
 
 });
 
-
-
-
 //////////////////////////////////////////////////////////
 // CAPTURA DE ERROR JSON
 //////////////////////////////////////////////////////////
@@ -210,21 +215,6 @@ app.use((error, req, res, next) => {
     }
 
     next(error);
-
-});
-
-////////////////////////////////////
-// VALIDA CRYPTO
-///////////////////////////////////
-app.use((req, res, next) => {
-
-    req.requestId = crypto.randomUUID();
-
-    console.log(
-        `[${req.requestId}] ${req.method} ${req.originalUrl}`
-    );
-
-    next();
 
 });
 

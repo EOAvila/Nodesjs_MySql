@@ -80,6 +80,19 @@ export const crearCliente = async (req, res) => {
         });
 
     } catch (error) {
+        
+        console.error(
+            "ERROR CREAR CLIENTE:"
+        );
+
+        console.error(error);
+
+        if (error.response) {
+            console.error(
+                "BITRIX RESPONSE:",
+                error.response.data
+            );
+        }
 
         return res.status(500).json({
             success: false,

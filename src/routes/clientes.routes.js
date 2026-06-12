@@ -29,6 +29,5 @@ router.get("/", (req, res) => {
         message: "Endpoint clientes activo"
     });
 });
-router.post("/", crearCliente);
-
+/////////////////////////
 export default router;

@@ -84,8 +84,8 @@ export const obtenerContactoBitrix = async (
 
 export const crearContactoBitrix = async (cliente) => {
 
-    const response = await axios.post(
-        `${bitrixApi}crm.contact.add.json`,
+    const response = await bitrixApi.post(
+        "crm.contact.add.json",
         {
             fields: {
                 NAME: cliente.nombre,
@@ -118,8 +118,8 @@ export const actualizarContactoBitrix = async (
     cliente
 ) => {
 
-    await axios.post(
-        `${bitrixApi}crm.contact.update.json`,
+    await bitrixApi.post(
+        `crm.contact.update.json`,
         {
             id: bitrix_id,
             fields: {

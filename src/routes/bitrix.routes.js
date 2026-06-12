@@ -22,6 +22,7 @@ router.get("/bitrix", (req, res) => {
     });
 });
 
+/*
 router.post("/bitrix", (req, res) => {
     console.log("Webhook recibido");
     console.log(req.body);
@@ -31,7 +32,7 @@ router.post("/bitrix", (req, res) => {
         mensaje: "Webhook recibido"
     });
 });
-
+*/
 ////////////////////////////////////////////////////////////////
 
 router.post(
