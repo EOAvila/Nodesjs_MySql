@@ -94,10 +94,10 @@ app.use(
     productosRoutes
 );
 
-//app.use(
-//    "/api/inventario",
-//    inventarioRoutes
-//);
+app.use(
+    "/api/inventario",
+    inventarioRoutes
+);
 
 ////////////////////////////////////////////////////////////
 // RUTA PRINCIPAL
