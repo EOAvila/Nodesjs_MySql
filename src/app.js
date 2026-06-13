@@ -15,8 +15,8 @@ import clientesRoutes from "./routes/clientes.routes.js";
 import productosRoutes
     from "./routes/productos.routes.js";
 
-//import inventarioRoutes
-//    from "./routes/inventario.routes.js";
+import inventarioRoutes
+    from "./routes/inventario.routes.js";
 ///////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////

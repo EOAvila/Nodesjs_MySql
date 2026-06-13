@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/package",
   "name": "api-rest---exclusive",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "API REST NodeJS Bitrix24 + MySQL",
   "main": "src/server.js",
   "scripts": {
