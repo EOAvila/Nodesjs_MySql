@@ -3,10 +3,11 @@
 /////////////////////////////////////////////////////////////
 
 import validator from "validator";
+import pool from "../config/db.js";
 
-import {
-    bitrixRequest
-} from "./bitrix.service.js";
+//import {
+//    bitrixRequest
+//} from "./bitrix.service.js";
 
 const log = (...args) => {
 
