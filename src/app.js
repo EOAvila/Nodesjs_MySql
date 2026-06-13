@@ -12,6 +12,11 @@ import indexRoutes from "./routes/index.routes.js";
 import bitrixRoutes from "./routes/bitrix.routes.js";
 import clientesRoutes from "./routes/clientes.routes.js";
 
+import productosRoutes
+    from "./routes/productos.routes.js";
+
+//import inventarioRoutes
+//    from "./routes/inventario.routes.js";
 ///////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
@@ -83,6 +88,16 @@ app.use("/api", indexRoutes);
 app.use("/webhook", bitrixRoutes);
 
 app.use("/clientes", clientesRoutes);
+
+app.use(
+    "/api/productos",
+    productosRoutes
+);
+
+//app.use(
+//    "/api/inventario",
+//    inventarioRoutes
+//);
 
 ////////////////////////////////////////////////////////////
 // RUTA PRINCIPAL

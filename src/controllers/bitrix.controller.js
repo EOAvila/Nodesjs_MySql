@@ -11,7 +11,8 @@ import {
     buscarClientePorBitrixId,
     buscarClientePorCorreo,
     upsertCliente,
-    actualizarCliente
+    actualizarCliente,
+    eliminarCliente
 } from "../services/mysql.service.js";
 
 /////////////////////////////////////////////////////////////
@@ -245,6 +246,8 @@ export const webhookBitrix = async (req, res) => {
             );
         }
 
+
+        
         /////////////////////////////////////////////////////////////
         // RESPUESTA
         /////////////////////////////////////////////////////////////
