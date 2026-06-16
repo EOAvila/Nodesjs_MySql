@@ -10,7 +10,7 @@ import {
     sincronizarProductosController,
     webhookProductosController
 
-} from "../controllers/productos.controller.js";
+} from "../../controllers/inventarios/productos.controller.js";
 
 const router =
     express.Router();

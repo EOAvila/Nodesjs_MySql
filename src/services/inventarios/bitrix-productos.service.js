@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////
 
 import validator from "validator";
-import pool from "../config/db.js";
+import pool from "../../config/db.js";
 
 //import {
 //    bitrixRequest

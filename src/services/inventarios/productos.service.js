@@ -3,7 +3,7 @@
 /////////////////////////////////////////////////////////////
 
 import validator from "validator";
-import pool from "../config/db.js";
+import pool from "../../config/db.js";
 
 /////////////////////////////////////////////////////////////
 // VALIDAR PRODUCTO
@@ -305,3 +305,16 @@ async (
 
     return result.affectedRows;
 };
+///////////////////////////////
+// CREAR INVENTARIO INICIAL
+///////////////////////////////
+/*const [result] =
+    await pool.query(
+        sql,
+        valores
+    );
+
+await crearInventarioInicial(
+    result.insertId
+);
+*/

@@ -10,7 +10,7 @@ import {
     upsertProducto,
     eliminarProducto
 
-} from "../services/productos.service.js";
+} from "../../services/inventarios/productos.service.js";
 
 import {
 
@@ -20,7 +20,7 @@ import {
     eliminarProductoBitrix,
     listarProductosBitrix
 
-} from "../services/bitrix-productos.service.js";
+} from "../../services/inventarios/bitrix-productos.service.js";
 
 /////////////////////////////////////////////////////////////
 // CREAR PRODUCTO

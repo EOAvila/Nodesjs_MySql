@@ -18,6 +18,8 @@ router.post("/", crearCliente);
 
 router.put("/:id", actualizarClienteMysql);
 
+//router.patch("/:id", actualizarClienteMysql);
+
 //router.delete("/:id", eliminarClienteController);
 
 //////////////////////////////////////////////////

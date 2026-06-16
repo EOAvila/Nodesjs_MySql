@@ -20,7 +20,7 @@ import {
 
     sincronizarInventarioController
 
-} from "../controllers/inventario.controller.js";
+} from "../../controllers/inventarios/inventario.controller.js";
 
 const router =
     express.Router();

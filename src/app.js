@@ -13,10 +13,10 @@ import bitrixRoutes from "./routes/bitrix.routes.js";
 import clientesRoutes from "./routes/clientes.routes.js";
 
 import productosRoutes
-    from "./routes/productos.routes.js";
+    from "./routes/inventarios/productos.routes.js";
 
 import inventarioRoutes
-    from "./routes/inventario.routes.js";
+    from "./routes/inventarios/inventario.routes.js";
 ///////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
@@ -177,6 +177,25 @@ app.get("/webhook/test", (req, res) => {
 
 });
 */
+app.use((err, req, res, next) => {
+
+    console.error("=================================");
+    console.error("ERROR GLOBAL");
+    console.error(err);
+    console.error("=================================");
+
+    if (res.headersSent) {
+        return next(err);
+    }
+
+    res.status(500).json({
+        success: false,
+        message: err.message
+    });
+});
+
+
+/*
 app.use((error, req, res, next) => {
 
     console.error(
@@ -201,6 +220,7 @@ app.use((error, req, res, next) => {
     });
 
 });
+*/
 
 //////////////////////////////////////////////////////////
 // CAPTURA DE ERROR JSON
