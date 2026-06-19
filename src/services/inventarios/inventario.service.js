@@ -48,8 +48,36 @@ async (producto_id) => {
         )
     `;
 
-    await pool.execute(
+    await pool.query(
         sql,
         [producto_id]
     );
+};
+
+//////////////////////////////////////////////////////
+// OBTENER INVENTARIO
+//////////////////////////////////////////////////////
+export const obtenerInventarioService = 
+async (producto_id) => {
+
+    const sql = `
+        SELECT
+            i.id,
+            i.producto_id,
+            p.nombre,
+            p.codigo,
+            p.precio,
+            i.stock_actual,
+            i.stock_minimo,
+            i.stock_maximo,
+            i.fecha_actualizacion
+        FROM inventarios i
+        INNER JOIN productos p
+            ON p.id = i.producto_id
+        ORDER BY p.nombre
+    `;
+
+    const [rows] = await pool.query(sql);
+
+    return rows;
 };

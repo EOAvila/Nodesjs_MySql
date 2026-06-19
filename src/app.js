@@ -17,6 +17,9 @@ import productosRoutes
 
 import inventarioRoutes
     from "./routes/inventarios/inventario.routes.js";
+
+import asociadosRoutes 
+    from './routes/bancos/afiliacion/asociados.routes.js';
 ///////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////
@@ -98,6 +101,8 @@ app.use(
     "/api/inventario",
     inventarioRoutes
 );
+///////////////////////////////////////////
+app.use('/api/asociados', asociadosRoutes);
 
 ////////////////////////////////////////////////////////////
 // RUTA PRINCIPAL

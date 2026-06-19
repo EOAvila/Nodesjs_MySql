@@ -2,18 +2,32 @@
 // inventario.controller.js
 /////////////////////////////////////////////////////////////
 import {
-    listarInventario
+    listarInventario,
+    obtenerInventarioService
 } from "../../services/inventarios/inventario.service.js";
 
 /////////////////////////////////////////////////////////////
+export const obtenerInventarioController = async (req, res) => {
+    try {
 
-export const obtenerInventarioController =
-async (req, res) => {
+        const inventario = await obtenerInventarioService();
 
-    res.json({
-        success: true,
-        message: "obtenerInventarioController"
-    });
+        return res.status(200).json({
+            success: true,
+            total: inventario.length,
+            data: inventario
+        });
+
+    } catch (error) {
+
+        console.error("ERROR INVENTARIO:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
 };
 
 export const listarInventarioController =
