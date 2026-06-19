@@ -10,7 +10,7 @@ class AsociadosService {
     async getAll() {
         const [rows] = await pool.query(`
             SELECT *
-            FROM bco_asociado
+            FROM bco_asociados
             ORDER BY id DESC
         `);
 
@@ -20,7 +20,7 @@ class AsociadosService {
     async getById(id) {
         const [rows] = await pool.query(`
             SELECT *
-            FROM bco_asociado
+            FROM bco_asociados
             WHERE id = ?
         `, [id]);
 
@@ -30,7 +30,7 @@ class AsociadosService {
     async create(data) {
 
         const sql = `
-            INSERT INTO bco_asociado (
+            INSERT INTO bco_asociados (
                 codigo_asociado,
                 dui,
                 nit,
@@ -68,7 +68,7 @@ class AsociadosService {
     async update(id, data) {
 
         const sql = `
-            UPDATE bco_asociado
+            UPDATE bco_asociados
             SET
                 codigo_asociado = ?,
                 dui = ?,
@@ -105,7 +105,7 @@ class AsociadosService {
     async delete(id) {
 
         const [result] = await pool.query(`
-            DELETE FROM bco_asociado
+            DELETE FROM bco_asociados
             WHERE id = ?
         `, [id]);
 
