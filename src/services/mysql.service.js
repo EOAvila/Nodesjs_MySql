@@ -83,7 +83,8 @@ async ({
     nombre,
     apellido,
     correo,
-    telefono
+    telefono,
+    dui
 }) => {
 
     if (!bitrix_id) {
@@ -108,10 +109,12 @@ async ({
             pri_nombre,
             pri_apellido,
             correo,
-            telefono
+            telefono,
+            dui
         )
         VALUES
         (
+            ?,
             ?,
             ?,
             ?,
@@ -133,6 +136,9 @@ async ({
         telefono =
             VALUES(telefono),
 
+        dui =
+            VALUES(dui),
+
         updated_at =
             NOW()
     `;
@@ -147,7 +153,9 @@ async ({
 
         correo || "",
 
-        telefono || ""
+        telefono || "",
+
+        dui || ""
     ];
 
     const [result] =
@@ -229,7 +237,8 @@ export const actualizarCliente = async (
                 pri_nombre = ?,
                 pri_apellido = ?,
                 correo = ?,
-                telefono = ?
+                telefono = ?,
+                dui = ?
             WHERE bitrix_id = ?
             `,
             [
@@ -237,6 +246,7 @@ export const actualizarCliente = async (
                 cliente.apellido,
                 cliente.correo,
                 cliente.telefono,
+                cliente.dui,
                 bitrix_id
             ]
     );
