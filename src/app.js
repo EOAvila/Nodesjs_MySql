@@ -19,7 +19,7 @@ import inventarioRoutes
     from "./routes/inventarios/inventario.routes.js";
 
 import asociadosRoutes 
-    from './routes/bancos/afiliacion/asociados.routes.js';
+    from './routes/bancos/asociados/asociados.routes.js';
 ///////////////////////////////////////////////////////////
 
 ////////////////////////////////////////////////////////////

@@ -1,8 +1,11 @@
 ///////////////////////////////////////////
 // asociados.repository.js
 ///////////////////////////////////////////
-import { pool } from "../config/database.js";
+import { pool } from "../config/db.js";
 
+/////////////////////////////////
+// Listar todos los asociados
+/////////////////////////////////
 export async function findAll() {
 
     const [rows] = await pool.query(`
@@ -41,6 +44,18 @@ export async function findByBitrixId(bitrixId) {
 
     return rows[0];
 }
+/////////////////////////////////////////
+// exporta dui
+/////////////////////////////////////////
+export const findByDui = async (dui) => {
+
+    const [rows] = await pool.query(
+        'SELECT * FROM bco_asociados WHERE dui = ?',
+        [dui]
+    );
+
+    return rows[0];
+};
 
 export async function create(asociado) {
 
@@ -116,3 +131,12 @@ export async function update(id, asociado) {
         ]
     );
 }
+////////////////////////////////////////////
+export default {
+    findAll,
+    findById,
+    findByBitrixId,
+    findByDui,
+    create,
+    update
+};

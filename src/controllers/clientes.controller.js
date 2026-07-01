@@ -28,7 +28,8 @@ export const crearCliente = async (req, res) => {
             nombre,
             apellido,
             correo,
-            telefono
+            telefono,
+            dui
         } = req.body || {};
 
         if (!nombre) {
@@ -47,7 +48,8 @@ export const crearCliente = async (req, res) => {
                 nombre,
                 apellido,
                 correo,
-                telefono
+                telefono,
+                dui
             });
 
         /////////////////////////////////////////////////////
@@ -58,7 +60,8 @@ export const crearCliente = async (req, res) => {
             nombre,
             apellido,
             correo,
-            telefono
+            telefono,
+            dui
         });
         /*await pool.query(
             `
@@ -68,15 +71,17 @@ export const crearCliente = async (req, res) => {
                 pri_apellido,
                 correo,
                 telefono,
+                dui,
                 bitrix_id
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
             `,
             [
                 nombre,
                 apellido,
                 correo,
                 telefono,
+                dui,
                 bitrix_id
             ]
         );*/
@@ -124,7 +129,8 @@ export const actualizarClienteMysql = async (
             nombre,
             apellido,
             correo,
-            telefono
+            telefono,
+            dui
         } = req.body;
 
         /////////////////////////////////////////////////////
@@ -160,7 +166,8 @@ export const actualizarClienteMysql = async (
                 pri_nombre = ?,
                 pri_apellido = ?,
                 correo = ?,
-                telefono = ?
+                telefono = ?,
+                dui = ?
             WHERE id_pro_clientes = ?
             `,
             [
@@ -168,6 +175,7 @@ export const actualizarClienteMysql = async (
                 apellido,
                 correo,
                 telefono,
+                dui,
                 id
             ]
         );
@@ -182,7 +190,8 @@ export const actualizarClienteMysql = async (
                 nombre,
                 apellido,
                 correo,
-                telefono
+                telefono,
+                dui
             }
         );
 

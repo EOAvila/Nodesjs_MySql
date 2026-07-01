@@ -5,6 +5,41 @@ import
     pool 
 from '../../../config/db.js';
 
+import 
+    findByDui 
+from '../../../repository/asociados.repository.js';
+//////////////////////////////////////////////////////////////////
+
+//////////////////////////////////////////////////////
+// crea asociado
+//////////////////////////////////////////////////////
+export const crearAsociadoService = async (data) => {
+    const sql = `
+        INSERT INTO bco_asociados
+        (codigo_asociado, dui, nit, nombres, apellidos, fecha_nacimiento, genero, estado_civil, profesion, fecha_ingreso, estado)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `;
+
+    const values = [
+        data.codigo_asociado,
+        data.dui,
+        data.nit,
+        data.nombres,
+        data.apellidos,
+        data.fecha_nacimiento,
+        data.genero,
+        data.estado_civil,
+        data.profesion,
+        data.fecha_ingreso,
+        data.estado
+    ];
+
+    const [result] = await db.execute(sql, values);
+    return result;
+};
+
+//////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
 class AsociadosService {
 
     async getAll() {
@@ -29,6 +64,19 @@ class AsociadosService {
 
     async create(data) {
 
+                /////////////////////////////////////////
+        // valida dui
+        ////////////////////////////////////////
+        const existente = await findByDui(data.dui);
+
+        if (existente) {
+
+            throw new Error(
+                `Ya existe un asociado con DUI ${data.dui}`
+            );
+
+        }
+        ///////////////////////////////////////////////////
         const sql = `
             INSERT INTO bco_asociados (
                 codigo_asociado,
@@ -112,5 +160,5 @@ class AsociadosService {
         return result;
     }
 }
-
+////////////////////////////////////////////////////////////////////////
 export default new AsociadosService();
