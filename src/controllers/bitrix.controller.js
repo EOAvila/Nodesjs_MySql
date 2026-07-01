@@ -286,7 +286,7 @@ const procesarWebhookBitrix = async (body) => {
         apellido: contacto.LAST_NAME || "",
         correo: contacto.EMAIL?.[0]?.VALUE || "",
         telefono: contacto.PHONE?.[0]?.VALUE || "",
-        dui: contacto.DUI || "",
+        dui: contacto.DUI?.[0]?.VALUE || "",
         bitrix_id: Number(contacto.ID)
     };
 
