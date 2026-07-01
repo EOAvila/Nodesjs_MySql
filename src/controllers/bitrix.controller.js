@@ -180,7 +180,12 @@ export const webhookBitrix = async (req, res) => {
                     contacto.PHONE[0].VALUE
                 )
                 : "",
-
+                
+            dui: contacto.DUI?.[0]?.VALUE
+                ? validator.escape(
+                    contacto.DUI[0].VALUE
+                )
+                : "",
             bitrix_id: Number(contacto.ID)
         };
 
@@ -246,8 +251,6 @@ export const webhookBitrix = async (req, res) => {
             );
         }
 
-
-        
         /////////////////////////////////////////////////////////////
         // RESPUESTA
         /////////////////////////////////////////////////////////////
