@@ -73,7 +73,6 @@ export const buscarClientePorCorreo = async (
     return rows[0];
 };
 
-
 ///////////////////////////////////////////////////////////
 // UPSERT CLIENTE
 ///////////////////////////////////////////////////////////
@@ -167,38 +166,6 @@ async ({
     return result;
 };
 
-/*
-/////////////////////////////////////////////////////////////
-// INSERTAR CLIENTE
-/////////////////////////////////////////////////////////////
-
-export const insertarCliente = async (cliente) => {
-
-    const [result] = await pool.query(
-        `
-        INSERT INTO pro_clientes
-        (
-            pri_nombre,
-            pri_apellido,
-            correo,
-            telefono,
-            bitrix_id
-        )
-        VALUES (?, ?, ?, ?, ?)
-        `,
-        [
-            cliente.nombre,
-            cliente.apellido,
-            cliente.correo,
-            cliente.telefono,
-            cliente.bitrix_id
-        ]
-    );
-
-    return result;
-};
-*/
-
 ///////////////////////////////////////////////////////////
 // ELIMINAR
 ///////////////////////////////////////////////////////////
@@ -219,7 +186,6 @@ async (id) => {
 
     return result;
 };
-
 
 /////////////////////////////////////////////////////////////
 // ACTUALIZAR CLIENTE

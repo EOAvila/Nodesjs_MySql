@@ -105,7 +105,8 @@ export const crearContactoBitrix = async (cliente) => {
                         VALUE: cliente.correo,
                         VALUE_TYPE: "WORK"
                     }
-                ]
+                ],
+                DUI: cliente.dui
             }
         }
     );
