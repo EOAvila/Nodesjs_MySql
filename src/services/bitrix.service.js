@@ -141,7 +141,8 @@ export const actualizarContactoBitrix = async (
                         VALUE: cliente.correo,
                         VALUE_TYPE: "WORK"
                     }
-                ]
+                ],
+                DUI: cliente.dui
             }
         }
     );
