@@ -158,6 +158,10 @@ export const actualizarClienteMysql = async (
         /////////////////////////////////////////////////////
         // ACTUALIZAR MYSQL
         /////////////////////////////////////////////////////
+        const duiNormalizado =
+                dui && dui.trim() !== ''
+                ? dui.trim()
+                : null;
 
         await pool.query(
             `
@@ -175,7 +179,7 @@ export const actualizarClienteMysql = async (
                 apellido,
                 correo,
                 telefono,
-                dui,
+                duiNormalizado,
                 id
             ]
         );
@@ -191,7 +195,7 @@ export const actualizarClienteMysql = async (
                 apellido,
                 correo,
                 telefono,
-                dui
+                dui: duiNormalizado
             }
         );
 

@@ -262,10 +262,11 @@ export const webhookBitrix = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("BITRIX ERROR FULL:", {
+            console.error("BITRIX ERROR FULL:", {
             message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
+            response: error.response?.data || null,
+            status: error.response?.status || null,
+            url: error.config?.url || null
         });
 
         throw new Error("No se pudo obtener contacto Bitrix24");
