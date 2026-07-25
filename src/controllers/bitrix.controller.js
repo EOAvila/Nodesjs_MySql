@@ -366,6 +366,14 @@ async (
                 contactId
             );
 
+            console.log(
+                  "CONTACTO COMPLETO BITRIX:",
+                    JSON.stringify(
+                    contacto,
+                    null,
+                    2
+                )
+            );
 
         /////////////////////////////////////////////////////////////
         // VALIDAR CONTACTO
