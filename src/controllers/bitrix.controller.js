@@ -4,40 +4,63 @@
 
 import validator from "validator";
 
-
 import {
-    obtenerContactoBitrix
+obtenerContactoBitrix
 } from "../services/bitrix.service.js";
 
-
 import {
-    buscarClientePorBitrixId,
+buscarClientePorBitrixId,
 
-    upsertCliente,
+upsertCliente,
 
-    actualizarCliente,
+actualizarCliente,
 
-    eliminarCliente,
+eliminarCliente,
 
-    normalizarDui
+normalizarDui
 
 } from "../services/mysql.service.js";
 
-
 /////////////////////////////////////////////////////////////
+// CAMPO INTERNO DUI EN BITRIX24
+/////////////////////////////////////////////////////////////
+
+/*
+
+Bitrix24 no devuelve el campo personalizado como:
+
+
+contacto.DUI
+
+
+Devuelve el identificador interno:
+
+
+UF_CRM_1781908621
+
+
+Este identificador corresponde al campo utilizado
+para el DUI según la respuesta completa recibida.
+*/
+
+const CAMPO_DUI_BITRIX =
+    process.env.BITRIX_DUI_FIELD ||
+    "UF_CRM_1781908621";
+
+
+    /////////////////////////////////////////////////////////////
 // EVENTOS PERMITIDOS
 /////////////////////////////////////////////////////////////
 
 const EVENTOS_PERMITIDOS = [
 
-    "ONCRMCONTACTADD",
+"ONCRMCONTACTADD",
 
-    "ONCRMCONTACTUPDATE",
+"ONCRMCONTACTUPDATE",
 
-    "ONCRMCONTACTDELETE"
+"ONCRMCONTACTDELETE"
 
 ];
-
 
 /////////////////////////////////////////////////////////////
 // OBTENER ID DEL CONTACTO
@@ -46,27 +69,126 @@ const EVENTOS_PERMITIDOS = [
 const obtenerContactId =
 (data) => {
 
-    const id =
+const id =
 
-        data?.ID ||
+    data?.ID ||
 
-        data?.FIELDS?.ID;
+    data?.FIELDS?.ID;
+
+
+if (
+
+    id === null ||
+
+    id === undefined
+
+) {
+    return null;
+}
+
+
+return String(
+    id
+).trim();
+
+};
+
+
+/////////////////////////////////////////////////////////////
+// EXTRAER VALOR DE CAMPO BITRIX
+/////////////////////////////////////////////////////////////
+
+const extraerValorCampo =
+(valor) => {
+
+if (
+
+    valor === null ||
+
+    valor === undefined
+
+) {
+    return "";
+}
+
+
+if (
+    Array.isArray(valor)
+) {
+
+    const primerValor =
+        valor[0];
 
 
     if (
-        id === null ||
-        id === undefined
+
+        primerValor &&
+
+        typeof primerValor === "object"
+
     ) {
 
-        return null;
+        return String(
+
+            primerValor.VALUE ||
+
+            primerValor.value ||
+
+            ""
+
+        ).trim();
     }
 
 
     return String(
-        id
+        primerValor || ""
     ).trim();
+}
+
+
+if (
+
+    typeof valor === "object"
+
+) {
+
+    return String(
+
+        valor.VALUE ||
+
+        valor.value ||
+
+        ""
+
+    ).trim();
+}
+
+
+return String(
+    valor
+).trim();
+
 };
 
+/////////////////////////////////////////////////////////////
+// OBTENER DUI DE BITRIX24
+/////////////////////////////////////////////////////////////
+
+const obtenerDuiBitrix =
+(contacto) => {
+
+const valorDui =
+
+    contacto?.[
+        CAMPO_DUI_BITRIX
+    ];
+
+
+return extraerValorCampo(
+    valorDui
+);
+
+};
 
 /////////////////////////////////////////////////////////////
 // MAPEAR CONTACTO BITRIX
@@ -75,105 +197,94 @@ const obtenerContactId =
 const mapearContacto =
 (contacto) => {
 
+/////////////////////////////////////////////////////////////
+// EMAIL
+/////////////////////////////////////////////////////////////
 
-    /////////////////////////////////////////////////////////////
-    // EMAIL
-    /////////////////////////////////////////////////////////////
+const correoOriginal =
 
-    const correoOriginal =
+    contacto.EMAIL?.[0]?.VALUE ||
 
-        contacto.EMAIL?.[0]?.VALUE ||
-
-        "";
-
-
-    const correo =
-
-        correoOriginal
-
-            ? validator.normalizeEmail(
-                String(
-                    correoOriginal
-                ).trim()
-            )
-
-            : "";
+    "";
 
 
-    /////////////////////////////////////////////////////////////
-    // TELEFONO
-    /////////////////////////////////////////////////////////////
+const correo =
 
-    const telefono =
+    correoOriginal
 
-        contacto.PHONE?.[0]?.VALUE
-
-            ? String(
-                contacto.PHONE[0].VALUE
+        ? validator.normalizeEmail(
+            String(
+                correoOriginal
             ).trim()
+        )
 
-            : "";
-
-
-    /////////////////////////////////////////////////////////////
-    // DUI
-    /////////////////////////////////////////////////////////////
-
-    const duiOriginal =
-
-        contacto.DUI?.[0]?.VALUE ||
-
-        "";
+        : "";
 
 
-    const dui =
+/////////////////////////////////////////////////////////////
+// TELEFONO
+/////////////////////////////////////////////////////////////
 
-        normalizarDui(
-            duiOriginal
-        );
+const telefono =
 
+    contacto.PHONE?.[0]?.VALUE
 
-    /////////////////////////////////////////////////////////////
-    // CLIENTE
-    /////////////////////////////////////////////////////////////
+        ? String(
+            contacto.PHONE[0].VALUE
+        ).trim()
 
-    return {
-
-        bitrix_id:
-
-            Number(
-                contacto.ID
-            ),
+        : "";
 
 
-        nombre:
+/////////////////////////////////////////////////////////////
+// DUI
+/////////////////////////////////////////////////////////////
 
-            String(
-                contacto.NAME || ""
-            ).trim(),
+const duiOriginal =
 
-
-        apellido:
-
-            String(
-                contacto.LAST_NAME || ""
-            ).trim(),
+    obtenerDuiBitrix(
+        contacto
+    );
 
 
-        correo:
+const dui =
+
+    normalizarDui(
+        duiOriginal
+    );
 
 
-            correo || "",
+/////////////////////////////////////////////////////////////
+// CLIENTE
+/////////////////////////////////////////////////////////////
 
+return {
 
-        telefono,
+    bitrix_id:
+        Number(
+            contacto.ID
+        ),
 
+    nombre:
+        String(
+            contacto.NAME || ""
+        ).trim(),
 
-        dui
+    apellido:
+        String(
+            contacto.LAST_NAME || ""
+        ).trim(),
 
-    };
+    correo:
+        correo || "",
+
+    telefono,
+
+    dui
+
 };
 
+};
 
 /////////////////////////////////////////////////////////////
 // WEBHOOK BITRIX
@@ -181,364 +292,157 @@ const mapearContacto =
 
 export const webhookBitrix =
 async (
-    req,
-    res
+req,
+res
 ) => {
 
-
-    try {
-
-
-        /////////////////////////////////////////////////////////////
-        // VALIDAR BODY
-        /////////////////////////////////////////////////////////////
-
-        if (
-
-            !req.body ||
-
-            typeof req.body !== "object"
-
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    "Body inválido"
-
-            });
-        }
+try {
 
 
-        /////////////////////////////////////////////////////////////
-        // EXTRAER DATOS
-        /////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
+    // VALIDAR BODY
+    /////////////////////////////////////////////////////////////
 
-        const {
+    if (
 
-            event,
+        !req.body ||
 
+        typeof req.body !== "object"
+
+    ) {
+
+        return res.status(
+            400
+        ).json({
+
+            success: false,
+
+            message:
+                "Body inválido"
+
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // EXTRAER DATOS
+    /////////////////////////////////////////////////////////////
+
+    const {
+
+        event,
+
+        data
+
+    } = req.body;
+
+
+    /////////////////////////////////////////////////////////////
+    // VALIDAR EVENTO
+    /////////////////////////////////////////////////////////////
+
+    if (
+        !event
+    ) {
+
+        return res.status(
+            400
+        ).json({
+
+            success: false,
+
+            message:
+                "Evento requerido"
+
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // VALIDAR EVENTO SOPORTADO
+    /////////////////////////////////////////////////////////////
+
+    if (
+
+        !EVENTOS_PERMITIDOS.includes(
+            event
+        )
+
+    ) {
+
+        return res.status(
+            400
+        ).json({
+
+            success: false,
+
+            message:
+                "Evento no soportado"
+
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // OBTENER ID
+    /////////////////////////////////////////////////////////////
+
+    const contactId =
+
+        obtenerContactId(
             data
-
-        } = req.body;
-
-
-        /////////////////////////////////////////////////////////////
-        // VALIDAR EVENTO
-        /////////////////////////////////////////////////////////////
-
-        if (
-            !event
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    "Evento requerido"
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // VALIDAR EVENTO SOPORTADO
-        /////////////////////////////////////////////////////////////
-
-        if (
-
-            !EVENTOS_PERMITIDOS.includes(
-                event
-            )
-
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    "Evento no soportado"
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // OBTENER ID DEL CONTACTO
-        /////////////////////////////////////////////////////////////
-
-        const contactId =
-
-            obtenerContactId(
-                data
-            );
-
-
-        /////////////////////////////////////////////////////////////
-        // VALIDAR ID
-        /////////////////////////////////////////////////////////////
-
-        if (
-
-            !contactId ||
-
-            !validator.isNumeric(
-                contactId
-            )
-
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    "ID de contacto inválido"
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // EVENTO DELETE
-        /////////////////////////////////////////////////////////////
-
-        if (
-
-            event ===
-
-            "ONCRMCONTACTDELETE"
-
-        ) {
-
-
-            await eliminarCliente(
-                contactId
-            );
-
-
-            console.log(
-
-                "CLIENTE ELIMINADO:",
-
-                contactId
-
-            );
-
-
-            return res.status(
-                200
-            ).json({
-
-                success: true,
-
-                message:
-                    "Cliente eliminado correctamente",
-
-                bitrix_id:
-                    Number(
-                        contactId
-                    )
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // OBTENER CONTACTO COMPLETO
-        /////////////////////////////////////////////////////////////
-
-        const contacto =
-
-            await obtenerContactoBitrix(
-                contactId
-            );
-
-            console.log(
-                  "CONTACTO COMPLETO BITRIX:",
-                    JSON.stringify(
-                    contacto,
-                    null,
-                    2
-                )
-            );
-
-        /////////////////////////////////////////////////////////////
-        // VALIDAR CONTACTO
-        /////////////////////////////////////////////////////////////
-
-        if (
-
-            !contacto ||
-
-            typeof contacto !== "object"
-
-        ) {
-
-            return res.status(
-                404
-            ).json({
-
-                success: false,
-
-                message:
-                    "Contacto no encontrado"
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // LOG CORRECTO
-        /////////////////////////////////////////////////////////////
-
-        console.log(
-
-            "BITRIX CONTACTO RECIBIDO:",
-
-            {
-
-                id:
-                    contacto.ID,
-
-                nombre:
-                    contacto.NAME,
-
-                apellido:
-                    contacto.LAST_NAME
-
-            }
-
         );
 
 
-        /////////////////////////////////////////////////////////////
-        // MAPEAR CLIENTE
-        /////////////////////////////////////////////////////////////
+    if (
 
-        const cliente =
+        !contactId ||
 
-            mapearContacto(
-                contacto
-            );
+        !validator.isNumeric(
+            contactId
+        )
 
+    ) {
 
-        /////////////////////////////////////////////////////////////
-        // VALIDAR CORREO
-        /////////////////////////////////////////////////////////////
+        return res.status(
+            400
+        ).json({
 
-        if (
+            success: false,
 
-            cliente.correo &&
+            message:
+                "ID de contacto inválido"
 
-            !validator.isEmail(
-                cliente.correo
-            )
-
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    "Correo inválido"
-
-            });
-        }
+        });
+    }
 
 
-        /////////////////////////////////////////////////////////////
-        // BUSCAR CLIENTE EXISTENTE
-        /////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
+    // ELIMINAR CONTACTO
+    /////////////////////////////////////////////////////////////
 
-        const existe =
+    if (
 
-            await buscarClientePorBitrixId(
+        event ===
 
-                cliente.bitrix_id
+        "ONCRMCONTACTDELETE"
 
-            );
-
-
-        /////////////////////////////////////////////////////////////
-        // INSERTAR
-        /////////////////////////////////////////////////////////////
-
-        if (
-            !existe
-        ) {
+    ) {
 
 
-            await upsertCliente(
-                cliente
-            );
+        await eliminarCliente(
+            contactId
+        );
 
 
-            console.log(
+        console.log(
 
-                "CLIENTE INSERTADO:",
+            "CLIENTE ELIMINADO:",
 
-                cliente.bitrix_id,
+            contactId
 
-                "DUI:",
+        );
 
-                cliente.dui
-
-            );
-
-
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // ACTUALIZAR
-        /////////////////////////////////////////////////////////////
-
-        else {
-
-
-            await actualizarCliente(
-
-                cliente.bitrix_id,
-
-                cliente
-
-            );
-
-
-            console.log(
-
-                "CLIENTE ACTUALIZADO:",
-
-                cliente.bitrix_id,
-
-                "DUI:",
-
-                cliente.dui
-
-            );
-
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // RESPUESTA EXITOSA
-        /////////////////////////////////////////////////////////////
 
         return res.status(
             200
@@ -547,109 +451,296 @@ async (
             success: true,
 
             message:
-                existe
+                "Cliente eliminado correctamente",
 
-                    ? "Cliente actualizado correctamente"
-
-                    : "Cliente insertado correctamente",
-
-            data: {
-
-                bitrix_id:
-                    cliente.bitrix_id,
-
-                dui:
-                    cliente.dui
-
-            }
+            bitrix_id:
+                Number(
+                    contactId
+                )
 
         });
-
-
     }
 
 
     /////////////////////////////////////////////////////////////
-    // MANEJO DE ERRORES
+    // OBTENER CONTACTO COMPLETO
     /////////////////////////////////////////////////////////////
 
-    catch (
-        error
-    ) {
+    const contacto =
 
-
-        console.error(
-
-            "BITRIX ERROR FULL:",
-
-            {
-
-                message:
-                    error.message,
-
-                response:
-                    error.response?.data ||
-                    null,
-
-                status:
-                    error.response?.status ||
-                    null,
-
-                url:
-                    error.config?.url ||
-                    null,
-
-                stack:
-                    error.stack
-
-            }
-
+        await obtenerContactoBitrix(
+            contactId
         );
 
 
-        /////////////////////////////////////////////////////////////
-        // ERROR DUI
-        /////////////////////////////////////////////////////////////
+    if (
 
-        if (
+        !contacto ||
 
-            error.message.includes(
-                "DUI inválido"
-            )
+        typeof contacto !== "object"
 
-        ) {
-
-            return res.status(
-                400
-            ).json({
-
-                success: false,
-
-                message:
-                    error.message
-
-            });
-        }
-
-
-        /////////////////////////////////////////////////////////////
-        // ERROR GENERAL
-        /////////////////////////////////////////////////////////////
+    ) {
 
         return res.status(
-            500
+            404
         ).json({
 
             success: false,
 
             message:
-                "Error procesando webhook Bitrix24",
+                "Contacto no encontrado"
 
-            error:
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // MAPEAR CLIENTE
+    /////////////////////////////////////////////////////////////
+
+    const cliente =
+
+        mapearContacto(
+            contacto
+        );
+
+
+    /////////////////////////////////////////////////////////////
+    // LOG PROFESIONAL DE DIAGNÓSTICO
+    /////////////////////////////////////////////////////////////
+
+    console.log(
+
+        "BITRIX CONTACTO RECIBIDO:",
+
+        {
+
+            id:
+                cliente.bitrix_id,
+
+            nombre:
+                cliente.nombre,
+
+            apellido:
+                cliente.apellido,
+
+            campoDui:
+                CAMPO_DUI_BITRIX,
+
+            duiRecibido:
+                contacto[
+                    CAMPO_DUI_BITRIX
+                ] || null,
+
+            duiNormalizado:
+                cliente.dui
+
+        }
+
+    );
+
+
+    /////////////////////////////////////////////////////////////
+    // VALIDAR CORREO
+    /////////////////////////////////////////////////////////////
+
+    if (
+
+        cliente.correo &&
+
+        !validator.isEmail(
+            cliente.correo
+        )
+
+    ) {
+
+        return res.status(
+            400
+        ).json({
+
+            success: false,
+
+            message:
+                "Correo inválido"
+
+        });
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // BUSCAR CLIENTE
+    /////////////////////////////////////////////////////////////
+
+    const existe =
+
+        await buscarClientePorBitrixId(
+
+            cliente.bitrix_id
+
+        );
+
+
+    /////////////////////////////////////////////////////////////
+    // INSERTAR
+    /////////////////////////////////////////////////////////////
+
+    if (
+        !existe
+    ) {
+
+
+        await upsertCliente(
+            cliente
+        );
+
+
+        console.log(
+
+            "CLIENTE INSERTADO:",
+
+            cliente.bitrix_id,
+
+            "DUI:",
+
+            cliente.dui
+
+        );
+
+
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // ACTUALIZAR
+    /////////////////////////////////////////////////////////////
+
+    else {
+
+
+        await actualizarCliente(
+
+            cliente.bitrix_id,
+
+            cliente
+
+        );
+
+
+        console.log(
+
+            "CLIENTE ACTUALIZADO:",
+
+            cliente.bitrix_id,
+
+            "DUI:",
+
+            cliente.dui
+
+        );
+
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // RESPUESTA
+    /////////////////////////////////////////////////////////////
+
+    return res.status(
+        200
+    ).json({
+
+        success: true,
+
+        message:
+
+            existe
+
+                ? "Cliente actualizado correctamente"
+
+                : "Cliente insertado correctamente",
+
+        data: {
+
+            bitrix_id:
+                cliente.bitrix_id,
+
+            dui:
+                cliente.dui
+
+        }
+
+    });
+
+
+} catch (
+    error
+) {
+
+
+    console.error(
+
+        "BITRIX ERROR FULL:",
+
+        {
+
+            message:
+                error.message,
+
+            response:
+                error.response?.data ||
+                null,
+
+            status:
+                error.response?.status ||
+                null,
+
+            url:
+                error.config?.url ||
+                null,
+
+            stack:
+                error.stack
+
+        }
+
+    );
+
+
+    if (
+
+        error.message.includes(
+            "DUI inválido"
+        )
+
+    ) {
+
+        return res.status(
+            400
+        ).json({
+
+            success: false,
+
+            message:
                 error.message
 
         });
-
     }
+
+
+    return res.status(
+        500
+    ).json({
+
+        success: false,
+
+        message:
+            "Error procesando webhook Bitrix24",
+
+        error:
+            error.message
+
+    });
+
+}
 
 };
