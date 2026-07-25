@@ -5,280 +5,369 @@
 import validator from "validator";
 import { pool } from "../config/db.js";
 
+
 /////////////////////////////////////////////////////////////
 // NORMALIZAR DUI DE EL SALVADOR
 /////////////////////////////////////////////////////////////
 
 /**
-
-Normaliza un DUI salvadoreño al formato:
-
-
-01234567-8
-
-
-Acepta valores como:
-
-
-01234567-8
-012345678
-01 234567-8
-01-234567-8
-
-
-Retorna:
-
-
-
-
-DUI normalizado
-
-
-null si el DUI está vacío
-
-
-
-Lanza error si el formato es inválido.
-*/
+ * Normaliza el DUI al formato:
+ *
+ * 01234567-8
+ *
+ * Acepta:
+ *
+ * 01234567-8
+ * 012345678
+ * 01 234567-8
+ * 01-234567-8
+ *
+ * El DUI se guarda siempre como VARCHAR.
+ */
 export const normalizarDui = (dui) => {
 
-if (
-dui === null ||
-dui === undefined ||
-dui === ""
-) {
-return null;
-}
+    // Si viene vacío, se guarda como NULL
+    if (
+        dui === null ||
+        dui === undefined ||
+        String(dui).trim() === ""
+    ) {
 
-// Convertir a texto y eliminar espacios
-const duiTexto = String(dui).trim();
+        return null;
+    }
 
-// Conservar únicamente los dígitos
-const duiDigitos = duiTexto.replace(/\D/g, "");
 
-// Un DUI válido debe contener exactamente 9 dígitos
-if (duiDigitos.length !== 9) {
+    // Convertir a texto
+    const duiTexto =
+        String(dui).trim();
 
- throw new Error(
-     "DUI inválido. Debe contener exactamente 9 dígitos."
- );
 
-}
+    // Conservar únicamente los números
+    const duiDigitos =
+        duiTexto.replace(/\D/g, "");
 
-// Formato oficial: 8 dígitos + guion + 1 dígito
-return `${duiDigitos.slice(0, 8)}-${duiDigitos.slice(8)}`;
+
+    // El DUI salvadoreño debe tener 9 dígitos
+    if (
+        duiDigitos.length !== 9
+    ) {
+
+        throw new Error(
+            "DUI inválido. Debe contener exactamente 9 dígitos."
+        );
+    }
+
+
+    // Formato oficial:
+    //
+    // 8 dígitos - 1 dígito
+    //
+    // Ejemplo:
+    //
+    // 01234567-8
+
+    return `${duiDigitos.slice(0, 8)}-${duiDigitos.slice(8)}`;
 };
 
+
 /////////////////////////////////////////////////////////////
-// BUSCAR CLIENTE EN MYSQL POR BITRIX ID
+// BUSCAR CLIENTE POR BITRIX ID
 /////////////////////////////////////////////////////////////
 
 export const buscarClientePorBitrixId =
-async (bitrixId) => {
+async (
+    bitrixId
+) => {
 
-const sql = `
-    SELECT *
-    FROM pro_clientes
-    WHERE bitrix_id = ?
-    LIMIT 1
-`;
+    const sql = `
+        SELECT *
+        FROM pro_clientes
+        WHERE bitrix_id = ?
+        LIMIT 1
+    `;
 
-const [rows] =
-    await pool.query(
+
+    const [
+        rows
+    ] = await pool.query(
         sql,
-        [Number(bitrixId)]
+        [
+            Number(bitrixId)
+        ]
     );
 
-return rows.length
-    ? rows[0]
-    : null;
 
+    return rows.length
+        ? rows[0]
+        : null;
 };
+
 
 /////////////////////////////////////////////////////////////
 // BUSCAR CLIENTE POR ID
 /////////////////////////////////////////////////////////////
 
 export const buscarClientePorId =
-async (id) => {
+async (
+    id
+) => {
 
-const sql = `
-    SELECT *
-    FROM pro_clientes
-    WHERE id_pro_clientes = ?
-    LIMIT 1
-`;
+    const sql = `
+        SELECT *
+        FROM pro_clientes
+        WHERE id_pro_clientes = ?
+        LIMIT 1
+    `;
 
-const [rows] =
-    await pool.query(
+
+    const [
+        rows
+    ] = await pool.query(
         sql,
-        [Number(id)]
+        [
+            Number(id)
+        ]
     );
 
-return rows.length
-    ? rows[0]
-    : null;
 
+    return rows.length
+        ? rows[0]
+        : null;
 };
+
 
 /////////////////////////////////////////////////////////////
 // BUSCAR CLIENTE POR CORREO
 /////////////////////////////////////////////////////////////
 
 export const buscarClientePorCorreo =
-async (correo) => {
+async (
+    correo
+) => {
 
-const [rows] =
-    await pool.query(
+    if (
+        !correo
+    ) {
+
+        return null;
+    }
+
+
+    const [
+        rows
+    ] = await pool.query(
         `
             SELECT *
             FROM pro_clientes
             WHERE correo = ?
             LIMIT 1
         `,
-        [correo]
+        [
+            correo
+        ]
     );
 
-return rows.length
-    ? rows[0]
-    : null;
 
+    return rows.length
+        ? rows[0]
+        : null;
 };
 
+
 /////////////////////////////////////////////////////////////
-// UPSERT CLIENTE
+// INSERTAR O ACTUALIZAR CLIENTE
 /////////////////////////////////////////////////////////////
 
 export const upsertCliente =
 async ({
-bitrix_id,
-nombre,
-apellido,
-correo,
-telefono,
-dui
+    bitrix_id,
+    nombre,
+    apellido,
+    correo,
+    telefono,
+    dui
 }) => {
 
-if (!bitrix_id) {
 
-    throw new Error(
-        "bitrix_id requerido"
-    );
-}
+    /////////////////////////////////////////////////////////////
+    // VALIDAR BITRIX ID
+    /////////////////////////////////////////////////////////////
 
-/////////////////////////////////////////////////////////////
-// VALIDAR CORREO
-/////////////////////////////////////////////////////////////
+    if (
+        !bitrix_id
+    ) {
 
-if (
-    correo &&
-    !validator.isEmail(correo)
-) {
+        throw new Error(
+            "bitrix_id requerido"
+        );
+    }
 
-    throw new Error(
-        "Correo inválido"
-    );
-}
 
-/////////////////////////////////////////////////////////////
-// NORMALIZAR DUI
-/////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////
+    // NORMALIZAR DATOS
+    /////////////////////////////////////////////////////////////
 
-const duiNormalizado =
-    normalizarDui(dui);
+    const nombreNormalizado =
+        String(
+            nombre || ""
+        ).trim();
 
-/////////////////////////////////////////////////////////////
-// SQL
-/////////////////////////////////////////////////////////////
 
-const sql = `
-    INSERT INTO pro_clientes
-    (
-        bitrix_id,
-        pri_nombre,
-        pri_apellido,
-        correo,
-        telefono,
-        dui
-    )
-    VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-    )
+    const apellidoNormalizado =
+        String(
+            apellido || ""
+        ).trim();
 
-    ON DUPLICATE KEY UPDATE
 
-        pri_nombre =
-            VALUES(pri_nombre),
+    const correoNormalizado =
+        String(
+            correo || ""
+        ).trim()
+        .toLowerCase();
 
-        pri_apellido =
-            VALUES(pri_apellido),
 
-        correo =
-            VALUES(correo),
+    const telefonoNormalizado =
+        String(
+            telefono || ""
+        ).trim();
 
-        telefono =
-            VALUES(telefono),
 
-        dui =
-            VALUES(dui),
+    const duiNormalizado =
+        normalizarDui(
+            dui
+        );
 
-        updated_at =
+
+    /////////////////////////////////////////////////////////////
+    // VALIDAR CORREO
+    /////////////////////////////////////////////////////////////
+
+    if (
+
+        correoNormalizado &&
+
+        !validator.isEmail(
+            correoNormalizado
+        )
+
+    ) {
+
+        throw new Error(
+            "Correo inválido"
+        );
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // SQL
+    /////////////////////////////////////////////////////////////
+
+    const sql = `
+
+        INSERT INTO pro_clientes
+
+        (
+
+            bitrix_id,
+
+            pri_nombre,
+
+            pri_apellido,
+
+            correo,
+
+            telefono,
+
+            dui,
+
+            created_at,
+
+            updated_at
+
+        )
+
+        VALUES
+
+        (
+
+            ?,
+
+            ?,
+
+            ?,
+
+            ?,
+
+            ?,
+
+            ?,
+
+            NOW(),
+
             NOW()
-`;
 
-const values = [
+        )
 
-    Number(bitrix_id),
 
-    nombre || "",
+        ON DUPLICATE KEY UPDATE
 
-    apellido || "",
 
-    correo || "",
+            pri_nombre =
+                VALUES(pri_nombre),
 
-    telefono || "",
 
-    duiNormalizado
-];
+            pri_apellido =
+                VALUES(pri_apellido),
 
-const [result] =
-    await pool.query(
+
+            correo =
+                VALUES(correo),
+
+
+            telefono =
+                VALUES(telefono),
+
+
+            dui =
+                VALUES(dui),
+
+
+            updated_at =
+                NOW()
+
+    `;
+
+
+    const values = [
+
+        Number(
+            bitrix_id
+        ),
+
+        nombreNormalizado,
+
+        apellidoNormalizado,
+
+        correoNormalizado,
+
+        telefonoNormalizado,
+
+        duiNormalizado
+
+    ];
+
+
+    const [
+        result
+    ] = await pool.query(
         sql,
         values
     );
 
-return result;
 
+    return result;
 };
 
-/////////////////////////////////////////////////////////////
-// ELIMINAR CLIENTE
-/////////////////////////////////////////////////////////////
-
-export const eliminarCliente =
-async (id) => {
-
-const sql = `
-    DELETE
-    FROM pro_clientes
-    WHERE id_pro_clientes = ?
-`;
-
-const [result] =
-    await pool.query(
-        sql,
-        [Number(id)]
-    );
-
-return result;
-
-};
 
 /////////////////////////////////////////////////////////////
 // ACTUALIZAR CLIENTE
@@ -286,59 +375,154 @@ return result;
 
 export const actualizarCliente =
 async (
-bitrix_id,
-cliente
+    bitrixId,
+    cliente
 ) => {
 
+
+    /////////////////////////////////////////////////////////////
+    // NORMALIZAR DATOS
+    /////////////////////////////////////////////////////////////
+
+    const nombreNormalizado =
+        String(
+            cliente.nombre || ""
+        ).trim();
+
+
+    const apellidoNormalizado =
+        String(
+            cliente.apellido || ""
+        ).trim();
+
+
+    const correoNormalizado =
+        String(
+            cliente.correo || ""
+        ).trim()
+        .toLowerCase();
+
+
+    const telefonoNormalizado =
+        String(
+            cliente.telefono || ""
+        ).trim();
+
+
+    const duiNormalizado =
+        normalizarDui(
+            cliente.dui
+        );
+
+
+    /////////////////////////////////////////////////////////////
+    // VALIDAR CORREO
+    /////////////////////////////////////////////////////////////
+
+    if (
+
+        correoNormalizado &&
+
+        !validator.isEmail(
+            correoNormalizado
+        )
+
+    ) {
+
+        throw new Error(
+            "Correo inválido"
+        );
+    }
+
+
+    /////////////////////////////////////////////////////////////
+    // UPDATE
+    /////////////////////////////////////////////////////////////
+
+    const sql = `
+
+        UPDATE pro_clientes
+
+        SET
+
+            pri_nombre = ?,
+
+            pri_apellido = ?,
+
+            correo = ?,
+
+            telefono = ?,
+
+            dui = ?,
+
+            updated_at = NOW()
+
+        WHERE bitrix_id = ?
+
+    `;
+
+
+    const values = [
+
+        nombreNormalizado,
+
+        apellidoNormalizado,
+
+        correoNormalizado,
+
+        telefonoNormalizado,
+
+        duiNormalizado,
+
+        Number(
+            bitrixId
+        )
+
+    ];
+
+
+    const [
+        result
+    ] = await pool.query(
+        sql,
+        values
+    );
+
+
+    return result;
+};
+
+
 /////////////////////////////////////////////////////////////
-// NORMALIZAR DUI
+// ELIMINAR CLIENTE
 /////////////////////////////////////////////////////////////
 
-const duiNormalizado =
-    normalizarDui(cliente.dui);
+export const eliminarCliente =
+async (
+    bitrixId
+) => {
 
-/////////////////////////////////////////////////////////////
-// ACTUALIZAR
-/////////////////////////////////////////////////////////////
 
-const [result] =
-    await pool.query(
-        `
-            UPDATE pro_clientes
+    const sql = `
 
-            SET
+        DELETE FROM pro_clientes
 
-                pri_nombre = ?,
+        WHERE bitrix_id = ?
 
-                pri_apellido = ?,
+    `;
 
-                correo = ?,
 
-                telefono = ?,
-
-                dui = ?,
-
-                updated_at = NOW()
-
-            WHERE bitrix_id = ?
-        `,
+    const [
+        result
+    ] = await pool.query(
+        sql,
         [
-
-            cliente.nombre || "",
-
-            cliente.apellido || "",
-
-            cliente.correo || "",
-
-            cliente.telefono || "",
-
-            duiNormalizado,
-
-            Number(bitrix_id)
-
+            Number(
+                bitrixId
+            )
         ]
     );
 
-return result;
 
+    return result;
 };
